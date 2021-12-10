@@ -87,7 +87,7 @@ class Email(Field):
 
     @value.setter
     def value(self, new_email: str) -> None:
-        if re.search(r"[.a-z0-9-_]+@[a-z]{2,8}\.[a-z]{1,3}", new_email) is None:
+        if re.search(r"[.a-z0-9-_]+@[a-z]{1,8}\.[a-z]{1,3}", new_email) is None:
             raise EmailError
         self.__value = new_email
 
@@ -99,9 +99,26 @@ class AddressBook(UserDict):
         new_record = Record(name=record['name'],
                             phones=record['numbers'],
                             birthday=record['birthday'],
-                            addresses=record['addresses'],
+                            addresses=record['address'],
                             email=record['email'])
         self.data[new_record.name.value] = new_record
+
+    def find_record(self, sought_string: str) -> dict:
+        findings = {'by_name': [],
+                    'by_phone': [],
+                    'by_email': [],
+                    'by_address': [],
+                    }   
+        for name, record in self.data.items():
+            if sought_string in name:
+                findings['by_name'].append(str(record))
+            elif sought_string in '|,|'.join([p.value for p in record.phone]):
+                findings['by_phone'].append(str(record))
+            elif record.email is not None and sought_string in record.email.value:
+                findings['by_email'].append(str(record))
+            elif sought_string in '|,|'.join(addr.value for addr in record.address):
+                findings['by_address'].append(str(record))
+        return findings
 
 
 class Record:
@@ -119,12 +136,12 @@ class Record:
                 new_phone = Phone()
                 new_phone.value = p
                 self.phone.append(new_phone)
-        self.addresses = []
+        self.address = []
         if addresses is not None:
             for this_address in addresses:
                 new_address = Address()
                 new_address.value = this_address
-                self.addresses.append(new_address)
+                self.address.append(new_address)
         self.name = Name()
         self.name.value = name
         if birthday is not None:
@@ -137,3 +154,14 @@ class Record:
             self.email.value = email
         else:
             self.email = None
+
+    def __str__(self) -> str:
+        phones = ', '.join([p.value for p in self.phone]) if len(self.phone) > 0 else 'None'
+        birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
+        addresses = ', '.join([addr.value for addr in self.address]) if len(self.address) > 0 else 'None'
+        email = self.email.value if self.email is not None else 'None'
+        return f"\n|Record of {self.name.value} :\n" \
+               f"|phones : {phones}\n" \
+               f"|birthday : {birthday}\n" \
+               f"|addresses : {addresses}\n" \
+               f"|email : {email}\n"

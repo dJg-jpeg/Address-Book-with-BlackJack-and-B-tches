@@ -35,7 +35,9 @@ def get_handler(command_and_user_args: List[str], contacts: bot_classes.AddressB
     if command_and_user_args[0] not in handlers.COMMANDS.keys():
         raise bot_classes.UnknownCommandError
     necessary_handler = handlers.COMMANDS[command_and_user_args[0]]
-    if len(command_and_user_args) > 1:
+    if command_and_user_args[0] == 'find':
+        return necessary_handler(command_and_user_args[1], contacts)
+    elif len(command_and_user_args) > 1:
         contact_args = parse_user_input(command_and_user_args[1:])
         return necessary_handler(contact_args, contacts)
     return necessary_handler()
@@ -45,21 +47,18 @@ def parse_user_input(raw_contact: list) -> dict:
     parsed_contact = {'name': raw_contact[0],
                       'numbers': [],
                       'birthday': None,
-                      'addresses': [],
+                      'address': [],
                       'email': None,
                       }
     for attribute in raw_contact[1:]:
         if attribute.startswith('+'):
             parsed_contact['numbers'].append(attribute)
-            continue
         elif '@' in attribute:
             parsed_contact['email'] = attribute
-            continue
         elif re.search(r'\d{1,4}[.\s\\/]\d{1,4}[.\s\\/]\d{1,4}', attribute) is not None:
             parsed_contact['birthday'] = attribute
-            continue
         else:
-            parsed_contact['addresses'].append(attribute)
+            parsed_contact['address'].append(attribute)
     return parsed_contact
 
 
@@ -68,7 +67,7 @@ def main() -> None:
     address_book = bot_classes.AddressBook()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
-          'For example : \n add \n name , phones, birthday\n')
+          'For example : \n add name , phones, birthday\n')
     while bot_answer != 'Good bye!':
         console_args = deque(input('\nInput command and arguments, separating them by , :\n').split(','))
         if len(console_args) > 1:

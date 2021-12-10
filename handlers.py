@@ -15,8 +15,21 @@ def add_contact(contact: dict, contacts_book: bot_classes.AddressBook) -> Option
     return f"You successfully added {contact['name']} contact " \
            f"with {','.join(contact['numbers'])} numbers, " \
            f"{contact['birthday']} birthday, " \
-           f"{','.join(contact['addresses'])} addresses, " \
+           f"{','.join(contact['address'])} address, " \
            f"{contact['email']} email"
+
+
+def find_contact(find_string: str, contacts_book: bot_classes.AddressBook) -> str:
+    findings = contacts_book.find_record(find_string)
+    return f"By the '{find_string}' request bot founded contacts :\n" \
+           f"\n\tIn name :" \
+           f"\n\n{''.join(findings['by_name']) if len(findings['by_name']) > 0 else 'Nothing found'}\n" \
+           f"\n\tIn phone number/numbers :" \
+           f"\n\n{''.join(findings['by_phone']) if len(findings['by_phone']) > 0 else 'Nothing found'}\n" \
+           f"\n\tIn email :" \
+           f"\n\n{''.join(findings['by_email']) if len(findings['by_email']) > 0 else 'Nothing found'}\n" \
+           f"\n\tIn address/addresses :" \
+           f"\n\n{''.join(findings['by_address']) if len(findings['by_address']) > 0 else 'Nothing found'}\n"
 
 
 def goodbye() -> str:
@@ -27,6 +40,7 @@ COMMANDS = {
     'hello': greetings,
     'help': greetings,
     'add': add_contact,
+    'find': find_contact,
     'goodbye': goodbye,
     'exit': goodbye,
     'close': goodbye,
