@@ -20,6 +20,10 @@ class EmailError(Exception):
     """Invalid email input"""
 
 
+class InvalidDirectoryPathError(Exception):
+    """Invalid directory path"""
+
+
 class Field:
     """Fields of records in contact book : name , phone/phones , etc."""
 
