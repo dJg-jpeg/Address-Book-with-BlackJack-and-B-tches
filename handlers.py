@@ -1,5 +1,6 @@
 import bot_classes
 from typing import Optional
+import dir_sorter
 
 
 def greetings() -> str:
@@ -32,6 +33,10 @@ def find_contact(find_string: str, contacts_book: bot_classes.AddressBook) -> st
            f"\n\n{''.join(findings['by_address']) if len(findings['by_address']) > 0 else 'Nothing found'}\n"
 
 
+def dir_sort(path_to_dir: str) -> str:
+    return dir_sorter.sort_dir(path_to_dir)
+
+
 def goodbye() -> str:
     return 'Good bye!'
 
@@ -41,6 +46,7 @@ COMMANDS = {
     'help': [greetings, 'none_argument_commands'],
     'add_contact': [add_contact, 'contact_commands'],
     'find_contact': [find_contact, 'find_commands'],
+    'sort_dir': [dir_sort, 'sort_commands'],
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
@@ -55,6 +61,7 @@ COMMAND_ARGS = {
                    'address/addresses(optional), '
                    'email(optional) separating them by ,',
     'find_contact': 'find request',
+    'sort_dir': 'path to directory you want to sort',
     'goodbye': None,
     'exit': None,
     'close': None,

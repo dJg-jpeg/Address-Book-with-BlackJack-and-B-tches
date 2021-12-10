@@ -14,7 +14,8 @@ def input_error(func):
             return "This contact already exists, " \
                    "if you want to change number please use command change"
         except bot_classes.PhoneError:
-            return "Phone number must starts from + and phone must contain only digits" \
+            return "Phone number must starts from + " \
+                   "and phone must contain only digits" \
                    ", please try again"
         except bot_classes.BirthdayError:
             return "Data must match pattern 'day.month.year', " \
@@ -22,6 +23,9 @@ def input_error(func):
         except bot_classes.EmailError:
             return "You are trying to input invalid email address, " \
                    "please try again"
+        except bot_classes.InvalidDirectoryPathError:
+            return 'It is not a directory , ' \
+                   'please insert a valid directory path'
         return answer
 
     return wrapper
@@ -35,6 +39,8 @@ def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List
     necessary_handler = handlers.COMMANDS[command]
     if necessary_handler[1] == 'find_commands':
         return necessary_handler[0](arguments[0], contacts)
+    elif necessary_handler[1] == 'sort_commands':
+        return necessary_handler[0](arguments[0])
     elif necessary_handler[1] == 'contact_commands':
         return necessary_handler[0](parse_user_input(arguments), contacts)
 
