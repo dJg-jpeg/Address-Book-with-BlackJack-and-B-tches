@@ -37,11 +37,25 @@ def goodbye() -> str:
 
 
 COMMANDS = {
-    'hello': greetings,
-    'help': greetings,
-    'add': add_contact,
-    'find': find_contact,
-    'goodbye': goodbye,
-    'exit': goodbye,
-    'close': goodbye,
+    'hello': [greetings, 'none_argument_commands'],
+    'help': [greetings, 'none_argument_commands'],
+    'add_contact': [add_contact, 'contact_commands'],
+    'find_contact': [find_contact, 'find_commands'],
+    'goodbye': [goodbye, 'none_argument_commands'],
+    'exit': [goodbye, 'none_argument_commands'],
+    'close': [goodbye, 'none_argument_commands'],
+}
+
+COMMAND_ARGS = {
+    'hello': None,
+    'help': None,
+    'add_contact': 'name, '
+                   'phone number/numbers(optional), '
+                   'birthday(optional), '
+                   'address/addresses(optional), '
+                   'email(optional) separating them by ,',
+    'find_contact': 'find request',
+    'goodbye': None,
+    'exit': None,
+    'close': None,
 }

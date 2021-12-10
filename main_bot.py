@@ -3,7 +3,6 @@ import handlers
 import bot_classes
 import re
 from typing import List
-from collections import deque
 
 
 def input_error(func):
@@ -11,8 +10,6 @@ def input_error(func):
     def wrapper(*args, **kwargs):
         try:
             answer = func(*args, **kwargs)
-        except bot_classes.UnknownCommandError:
-            return "I don't know this command, please try input again"
         except bot_classes.ExistContactError:
             return "This contact already exists, " \
                    "if you want to change number please use command change"
@@ -31,16 +28,15 @@ def input_error(func):
 
 
 @input_error
-def get_handler(command_and_user_args: List[str], contacts: bot_classes.AddressBook) -> str:
-    if command_and_user_args[0] not in handlers.COMMANDS.keys():
-        raise bot_classes.UnknownCommandError
-    necessary_handler = handlers.COMMANDS[command_and_user_args[0]]
-    if command_and_user_args[0] == 'find':
-        return necessary_handler(command_and_user_args[1], contacts)
-    elif len(command_and_user_args) > 1:
-        contact_args = parse_user_input(command_and_user_args[1:])
-        return necessary_handler(contact_args, contacts)
-    return necessary_handler()
+def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List[str] = None) -> str:
+    if arguments is None:
+        necessary_handler = handlers.COMMANDS[command][0]
+        return necessary_handler()
+    necessary_handler = handlers.COMMANDS[command]
+    if necessary_handler[1] == 'find_commands':
+        return necessary_handler[0](arguments[0], contacts)
+    elif necessary_handler[1] == 'contact_commands':
+        return necessary_handler[0](parse_user_input(arguments), contacts)
 
 
 def parse_user_input(raw_contact: list) -> dict:
@@ -67,20 +63,20 @@ def main() -> None:
     address_book = bot_classes.AddressBook()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
-          'For example : \n add name , phones, birthday\n')
+          'For example : \n add \n name , phones, birthday\n')
     while bot_answer != 'Good bye!':
-        console_args = deque(input('\nInput command and arguments, separating them by , :\n').split(','))
-        if len(console_args) > 1:
-            command_and_name = console_args[0].split(' ')
-            command_and_name[0] = command_and_name[0].lower()
-            console_args.appendleft(command_and_name[0])
-            console_args[1] = command_and_name[1]
-            console_args = [arg.strip() for arg in console_args]
+        command = ((input("Input command :")).lower()).strip()
+        try:
+            args_for_command = handlers.COMMAND_ARGS[command]
+        except KeyError:
+            print("I don't know such command, please try again(")
+            continue
+        if args_for_command is not None:
+            user_args = (input(f"Input {args_for_command} :")).split(',')
+            user_args = [arg.strip() for arg in user_args]
+            bot_answer = get_handler(address_book, command, user_args)
         else:
-            if ' ' in console_args[0]:
-                console_args = console_args[0].split(' ')
-            console_args[0] = console_args[0].lower()
-        bot_answer = get_handler(console_args, address_book)
+            bot_answer = get_handler(address_book, command)
         print(bot_answer)
 
 

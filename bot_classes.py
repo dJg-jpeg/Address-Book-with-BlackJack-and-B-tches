@@ -4,10 +4,6 @@ from typing import List
 import re
 
 
-class UnknownCommandError(Exception):
-    """Unknown command for the bot"""
-
-
 class ExistContactError(Exception):
     """Contact already exists"""
 
