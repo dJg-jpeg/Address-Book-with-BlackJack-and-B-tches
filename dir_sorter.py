@@ -2,6 +2,7 @@ from pathlib import Path
 import re
 import shutil
 from bot_classes import InvalidDirectoryPathError
+from typing import Generator, List, Tuple
 
 FOLDERS_NAMES = ('image', 'video', 'audio', 'document', 'archive', 'unknown')
 FILE_TYPES_EXTENSIONS = (
@@ -13,14 +14,14 @@ FILE_TYPES_EXTENSIONS = (
 )
 
 
-def check_file_extension(extension):
+def check_file_extension(extension: str) -> str:
     for file_types in FILE_TYPES_EXTENSIONS:
         if extension in file_types:
             return FOLDERS_NAMES[FILE_TYPES_EXTENSIONS.index(file_types)]
     return FOLDERS_NAMES[5]
 
 
-def find_all_files(path, files):
+def find_all_files(path: Generator[Path], files: List[list]) -> Tuple[List[Path]]:
     for content in path:
         if content.is_file():
             extension = check_file_extension(get_filename_and_extension(content)[1])
@@ -31,7 +32,7 @@ def find_all_files(path, files):
     return files
 
 
-def make_dirs(path):
+def make_dirs(path: Path) -> List[Path]:
     sort_folders = []
     for folder_name in FOLDERS_NAMES:
         if check_is_dir_exist(path / folder_name) is False:
@@ -40,13 +41,13 @@ def make_dirs(path):
     return sort_folders
 
 
-def check_is_dir_exist(path):
+def check_is_dir_exist(path: Path) -> Path or bool:
     if path.exists() is True:
         return path
     return path.exists()
 
 
-def move_files(files, dirs):
+def move_files(files: Tuple[List[Path]], dirs: List[Path]) -> Tuple[List[Path]]:
     for file_type in files:
         for file_path in file_type:
             file_path.replace(dirs[files.index(file_type)] / file_path.name)
@@ -63,15 +64,15 @@ def move_files(files, dirs):
     return files
 
 
-def unpack_archives(archive, new_dir_path):
+def unpack_archives(archive: Path, new_dir_path: Path) -> None:
     shutil.unpack_archive(archive, new_dir_path)
 
 
-def get_filename_and_extension(filename):
+def get_filename_and_extension(filename: Path) -> Tuple[str, str]:
     return filename.resolve().stem, filename.suffix
 
 
-def rename_files(files):
+def rename_files(files: Tuple[List[Path]]) -> Tuple[List[Path]]:
     for category in files:
         for content in category:
             filename = normalize(get_filename_and_extension(content)[0]) + get_filename_and_extension(content)[1]
@@ -80,7 +81,7 @@ def rename_files(files):
     return files
 
 
-def remove_empty_dirs(path):
+def remove_empty_dirs(path: Generator[Path]) -> None:
     for content in path:
         if content.is_dir() is True and len(list(content.iterdir())) > 0:
             remove_empty_dirs(content.iterdir())
@@ -90,7 +91,7 @@ def remove_empty_dirs(path):
             continue
 
 
-def normalize(name):
+def normalize(name: str) -> str:
     table_symbols = ('абвгґдеєжзиіїйклмнопрстуфхцчшщюяыэАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЮЯЫЭьъЬЪ',
                      (
                          *u'abvhgde', 'ye', 'zh', *u'zyi', 'yi', *u'yklmnoprstuf', 'kh', 'ts',
@@ -104,7 +105,7 @@ def normalize(name):
     return rx.sub('_', name.translate(map_cyr_to_latin))
 
 
-def sort_dir(dir_name):
+def sort_dir(dir_name: str) -> str:
     p = Path(dir_name)
     if p.is_dir():
         all_files = find_all_files(p.iterdir(), [[], [], [], [], [], []])
