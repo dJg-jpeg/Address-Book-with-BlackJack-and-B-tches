@@ -67,6 +67,7 @@ def parse_user_input(raw_contact: list) -> dict:
 def main() -> None:
     bot_answer = ''
     address_book = bot_classes.AddressBook()
+    address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
           'For example : \n add \n name , phones, birthday\n')
@@ -83,6 +84,8 @@ def main() -> None:
             bot_answer = get_handler(address_book, command, user_args)
         else:
             bot_answer = get_handler(address_book, command)
+        if bot_answer == 'Good bye!':
+            address_book.save()
         print(bot_answer)
 
 
