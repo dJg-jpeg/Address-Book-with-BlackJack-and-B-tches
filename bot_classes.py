@@ -2,6 +2,11 @@ from collections import UserDict
 from datetime import datetime
 from typing import List
 import re
+import csv
+
+
+FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email')
+CONTACTS_PATH = 'contact_book.csv'
 
 
 class ExistContactError(Exception):
@@ -119,6 +124,42 @@ class AddressBook(UserDict):
             elif sought_string in '|,|'.join(addr.value for addr in record.address):
                 findings['by_address'].append(str(record))
         return findings
+
+    def load(self) -> None:
+        with open(CONTACTS_PATH, 'r') as tr:
+            contacts_reader = csv.DictReader(tr)
+            for row in contacts_reader:
+                contact_phones = row['numbers'].split(',') if row['numbers'] != 'None' else None
+                contact_birthday = row['birthday'] if row['birthday'] != 'None' else None
+                contact_addresses = row['addresses'].split(',') if row['addresses'] != 'None' else None
+                contact_email = row['email'] if row['email'] != 'None' else None
+                self.data[row['name']] = Record(row['name'],
+                                                contact_phones,
+                                                contact_birthday,
+                                                contact_addresses,
+                                                contact_email
+                                                )
+
+    def save(self) -> None:
+        with open(CONTACTS_PATH, 'w') as tw:
+            contacts_writer = csv.DictWriter(tw, FIELD_NAMES, )
+            contacts_writer.writeheader()
+            for name, record in self.data.items():
+                contact_phones = ','.join([p.value for p in record.phone]) if len(record.phone) > 0 else 'None'
+                if record.birthday is not None:
+                    contact_birthday = record.birthday.value.strftime("%d.%m.%Y")
+                else:
+                    contact_birthday = 'None'
+                contact_addresses = ','.join(
+                    [addr.value for addr in record.address]
+                ) if len(record.address) > 0 else 'None'
+                contact_email = record.email.value if record.email is not None else 'None'
+                contacts_writer.writerow({'name': name,
+                                          'numbers': contact_phones,
+                                          'birthday': contact_birthday,
+                                          'addresses': contact_addresses,
+                                          'email': contact_email,
+                                          })
 
 
 class Record:
