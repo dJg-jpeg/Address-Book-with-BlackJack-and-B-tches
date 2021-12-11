@@ -161,6 +161,10 @@ class AddressBook(UserDict):
                                           'email': contact_email,
                                           })
 
+    def see_all_contacts(self) -> str:
+        all_records = [str(record) for record in self.data.values()]
+        return '\n'.join(all_records)
+
 
 class Record:
     """Records(contacts) in users contact book.

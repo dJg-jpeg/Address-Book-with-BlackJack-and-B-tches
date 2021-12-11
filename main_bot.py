@@ -34,8 +34,10 @@ def input_error(func):
 @input_error
 def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List[str] = None) -> str:
     if arguments is None:
-        necessary_handler = handlers.COMMANDS[command][0]
-        return necessary_handler()
+        necessary_handler = handlers.COMMANDS[command]
+        if necessary_handler[1] == 'only_book_commands':
+            return necessary_handler[0](contacts)
+        return necessary_handler[0]()
     necessary_handler = handlers.COMMANDS[command]
     if necessary_handler[1] == 'find_commands':
         return necessary_handler[0](arguments[0], contacts)
@@ -53,7 +55,7 @@ def parse_user_input(raw_contact: list) -> dict:
                       'email': None,
                       }
     for attribute in raw_contact[1:]:
-        if attribute.startswith('+'):
+        if attribute.startswith('+') or attribute.isalnum():
             parsed_contact['numbers'].append(attribute)
         elif '@' in attribute:
             parsed_contact['email'] = attribute
