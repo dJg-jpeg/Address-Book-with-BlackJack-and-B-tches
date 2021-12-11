@@ -41,6 +41,11 @@ def show_all(contacts_book: bot_classes.AddressBook) -> str:
     return contacts_book.see_all_contacts()
 
 
+def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
+    contacts_book.delete_record(name)
+    return f"Successfully deleted {name} contact"
+
+
 def goodbye() -> str:
     return 'Good bye!'
 
@@ -49,7 +54,8 @@ COMMANDS = {
     'hello': [greetings, 'none_argument_commands'],
     'help': [greetings, 'none_argument_commands'],
     'add_contact': [add_contact, 'contact_commands'],
-    'find_contact': [find_contact, 'find_commands'],
+    'find_contact': [find_contact, 'one_argument_book_commands'],
+    'delete_contact': [delete_contact, 'one_argument_book_commands'],
     'sort_dir': [dir_sort, 'sort_commands'],
     'show_all': [show_all, 'only_book_commands'],
     'goodbye': [goodbye, 'none_argument_commands'],
@@ -67,6 +73,7 @@ COMMAND_ARGS = {
                    'email(optional) separating them by ,',
     'find_contact': 'find request',
     'sort_dir': 'path to directory you want to sort',
+    'delete_contact': 'name of the contact you want to delete',
     'show_all': None,
     'goodbye': None,
     'exit': None,
