@@ -2,7 +2,7 @@ from pathlib import Path
 import re
 import shutil
 from bot_classes import InvalidDirectoryPathError
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Any
 
 FOLDERS_NAMES = ('image', 'video', 'audio', 'document', 'archive', 'unknown')
 FILE_TYPES_EXTENSIONS = (
@@ -21,7 +21,7 @@ def check_file_extension(extension: str) -> str:
     return FOLDERS_NAMES[5]
 
 
-def find_all_files(path: Generator[Path], files: List[list]) -> Tuple[List[Path]]:
+def find_all_files(path: Generator[Path, Any, Any], files: List[list]) -> Tuple[List[Path]]:
     for content in path:
         if content.is_file():
             extension = check_file_extension(get_filename_and_extension(content)[1])
@@ -81,7 +81,7 @@ def rename_files(files: Tuple[List[Path]]) -> Tuple[List[Path]]:
     return files
 
 
-def remove_empty_dirs(path: Generator[Path]) -> None:
+def remove_empty_dirs(path: Generator[Path, Any, Any]) -> None:
     for content in path:
         if content.is_dir() is True and len(list(content.iterdir())) > 0:
             remove_empty_dirs(content.iterdir())

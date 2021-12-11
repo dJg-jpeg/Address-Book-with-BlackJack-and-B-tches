@@ -29,6 +29,10 @@ class InvalidDirectoryPathError(Exception):
     """Invalid directory path"""
 
 
+class UnknownContactError(Exception):
+    """Unknown contact in contact book"""
+
+
 class Field:
     """Fields of records in contact book : name , phone/phones , etc."""
 
@@ -95,6 +99,52 @@ class Email(Field):
         if re.search(r"[.a-z0-9-_]+@[a-z]{1,8}\.[a-z]{1,3}", new_email) is None:
             raise EmailError
         self.__value = new_email
+
+
+class Record:
+    """Records(contacts) in users contact book.
+    Only one name , birthday and email, but it can be more than one phone and more than one address"""
+
+    def __init__(self, name: str,
+                 phones: List[str] = None,
+                 birthday: str = None,
+                 addresses: List[str] = None,
+                 email: str = None) -> None:
+        self.phone = []
+        if phones is not None:
+            for p in phones:
+                new_phone = Phone()
+                new_phone.value = p
+                self.phone.append(new_phone)
+        self.address = []
+        if addresses is not None:
+            for this_address in addresses:
+                new_address = Address()
+                new_address.value = this_address
+                self.address.append(new_address)
+        self.name = Name()
+        self.name.value = name
+        if birthday is not None:
+            self.birthday = Birthday()
+            self.birthday.value = birthday
+        else:
+            self.birthday = None
+        if email is not None:
+            self.email = Email()
+            self.email.value = email
+        else:
+            self.email = None
+
+    def __str__(self) -> str:
+        phones = ', '.join([p.value for p in self.phone]) if len(self.phone) > 0 else 'None'
+        birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
+        addresses = ', '.join([addr.value for addr in self.address]) if len(self.address) > 0 else 'None'
+        email = self.email.value if self.email is not None else 'None'
+        return f"\n|Record of {self.name.value} :\n" \
+               f"|phones : {phones}\n" \
+               f"|birthday : {birthday}\n" \
+               f"|addresses : {addresses}\n" \
+               f"|email : {email}\n"
 
 
 class AddressBook(UserDict):
@@ -165,48 +215,12 @@ class AddressBook(UserDict):
         all_records = [str(record) for record in self.data.values()]
         return '\n'.join(all_records)
 
+    def get_record_by_name(self, name: str) -> Record:
+        try:
+            return self.data[name]
+        except KeyError:
+            raise UnknownContactError
 
-class Record:
-    """Records(contacts) in users contact book.
-    Only one name , birthday and email, but it can be more than one phone and more than one address"""
-
-    def __init__(self, name: str,
-                 phones: List[str] = None,
-                 birthday: str = None,
-                 addresses: List[str] = None,
-                 email: str = None) -> None:
-        self.phone = []
-        if phones is not None:
-            for p in phones:
-                new_phone = Phone()
-                new_phone.value = p
-                self.phone.append(new_phone)
-        self.address = []
-        if addresses is not None:
-            for this_address in addresses:
-                new_address = Address()
-                new_address.value = this_address
-                self.address.append(new_address)
-        self.name = Name()
-        self.name.value = name
-        if birthday is not None:
-            self.birthday = Birthday()
-            self.birthday.value = birthday
-        else:
-            self.birthday = None
-        if email is not None:
-            self.email = Email()
-            self.email.value = email
-        else:
-            self.email = None
-
-    def __str__(self) -> str:
-        phones = ', '.join([p.value for p in self.phone]) if len(self.phone) > 0 else 'None'
-        birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
-        addresses = ', '.join([addr.value for addr in self.address]) if len(self.address) > 0 else 'None'
-        email = self.email.value if self.email is not None else 'None'
-        return f"\n|Record of {self.name.value} :\n" \
-               f"|phones : {phones}\n" \
-               f"|birthday : {birthday}\n" \
-               f"|addresses : {addresses}\n" \
-               f"|email : {email}\n"
+    def delete_record(self, name: str) -> None:
+        self.get_record_by_name(name)
+        self.data.pop(name)

@@ -13,6 +13,9 @@ def input_error(func):
         except bot_classes.ExistContactError:
             return "This contact already exists, " \
                    "if you want to change number please use command change"
+        except bot_classes.UnknownContactError:
+            return "No contact with such name in contact book, " \
+                   "please try input different name"
         except bot_classes.PhoneError:
             return "Phone number must starts from + " \
                    "and phone must contain only digits" \
@@ -39,7 +42,7 @@ def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List
             return necessary_handler[0](contacts)
         return necessary_handler[0]()
     necessary_handler = handlers.COMMANDS[command]
-    if necessary_handler[1] == 'find_commands':
+    if necessary_handler[1] == 'one_argument_book_commands':
         return necessary_handler[0](arguments[0], contacts)
     elif necessary_handler[1] == 'sort_commands':
         return necessary_handler[0](arguments[0])
