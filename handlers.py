@@ -69,6 +69,12 @@ def find_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> O
     return found_note
 
 
+def change_note(name: str, note: str, new_note: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.modify_note(note, new_note)
+    return f"Successfully modified '{note}' to '{new_note}' for {contact['name']} contact"
+
+
 def add_tag(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     note = contact.get_note(note)
@@ -109,12 +115,12 @@ COMMANDS = {
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
-    'add_note': [add_note, 'add_note_tag_command'],
-    'delete_note': [delete_note, 'note_commands'],
-    'find_note': [find_note, 'note_commands'],
-    'add_tag': [add_note, 'add_note_tag_command'],
-    'find_notes_with_tag': 'note_commands',
-
+    'add_note': [add_note, '3args_note_commands'],
+    'delete_note': [delete_note, '2args_note_commands'],
+    'find_note': [find_note, '2args_note_commands'],
+    'add_tag': [add_note, '3args_note_commands'],
+    'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
+    'change_note': [change_note, '3args_note_commands'],
 }
 
 COMMAND_ARGS = {
@@ -138,4 +144,5 @@ COMMAND_ARGS = {
     'find_note': 'name of the contact, note',
     'add_tag': 'name of the contact, note, tag to add',
     'find_notes_with_tag': 'name of the contact, tag',
+    'change_note': 'name of the contact, note, new note'
 }

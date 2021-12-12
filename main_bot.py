@@ -55,9 +55,9 @@ def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List
         return necessary_handler[0](arguments[0])
     elif necessary_handler[1] == 'contact_commands':
         return necessary_handler[0](parse_user_input(arguments), contacts)
-    elif necessary_handler[1] == 'add_note_tag_command':
+    elif necessary_handler[1] == '3args_note_commands':
         return necessary_handler[0](arguments[0], arguments[1], arguments[2], contacts)
-    elif necessary_handler[1] == 'note_commands':
+    elif necessary_handler[1] == '2args_note_commands':
         return necessary_handler[0](arguments[0], arguments[1], contacts)
 
 

@@ -224,8 +224,12 @@ class Record:
         for p in self.note:
             if p.value == note:
                 return p
-            else:
-                raise UnknownNoteError
+        else:
+            raise UnknownNoteError
+
+    def modify_note(self, note: str, new_note: str) -> None:
+        note_to_modify = self.get_note(note)
+        note_to_modify.value = new_note
 
     def delete_note(self, note: str) -> None:
         note_to_delete = self.find_note(note)
