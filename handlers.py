@@ -47,7 +47,50 @@ def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
 
 
 def goodbye() -> str:
+
     return 'Good bye!'
+
+
+def add_note(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.add_note(note, tag)
+    return f"Successfully added '{note}' to {contact['name']} contact"
+
+
+def delete_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.delete_note(note)
+    return f"You've successfully deleted '{note}' note for the {contact['name']} contact"
+
+
+def find_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> Optional[bot_classes.Note]:
+    contact = contacts_book.get_record_by_name(name)
+    found_note = contact.get_note(note)
+    return found_note
+
+
+def change_note(name: str, note: str, new_note: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.modify_note(note, new_note)
+    return f"Successfully modified '{note}' to '{new_note}' for {contact['name']} contact"
+
+
+def add_tag(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    note = contact.get_note(note)
+    note.add_tag(tag)
+    return f"Successfully added '{tag}' to '{note}' of the {contact['name']}contact"
+
+
+def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    notes = list(contact.note.values())
+    found_notes = []
+    for note in notes:
+        merged_tags = ' '.join([p.value for p in note.tag])
+        if tag in merged_tags:
+            found_notes.add(note)
+    return f"Here are the list of the notes for the {contact['name']} contact with '{tag}' tag: {found_notes}"
 
 
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
@@ -72,6 +115,12 @@ COMMANDS = {
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
+    'add_note': [add_note, '3args_note_commands'],
+    'delete_note': [delete_note, '2args_note_commands'],
+    'find_note': [find_note, '2args_note_commands'],
+    'add_tag': [add_note, '3args_note_commands'],
+    'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
+    'change_note': [change_note, '3args_note_commands'],
 }
 
 COMMAND_ARGS = {
@@ -90,4 +139,10 @@ COMMAND_ARGS = {
     'goodbye': None,
     'exit': None,
     'close': None,
+    'add_note': 'name of the contact, note, tag',
+    'delete_note': 'name of the contact, note',
+    'find_note': 'name of the contact, note',
+    'add_tag': 'name of the contact, note, tag to add',
+    'find_notes_with_tag': 'name of the contact, tag',
+    'change_note': 'name of the contact, note, new note'
 }

@@ -16,6 +16,9 @@ def input_error(func):
         except bot_classes.UnknownContactError:
             return "No contact with such name in contact book, " \
                    "please try input different name"
+        except bot_classes.UnknownNoteError:
+            return "No such note for this contact, " \
+                   "please try input different note"
         except bot_classes.PhoneError:
             return "Phone number must starts from + " \
                    "and phone must contain only digits" \
@@ -52,6 +55,10 @@ def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List
         return necessary_handler[0](arguments[0])
     elif necessary_handler[1] == 'contact_commands':
         return necessary_handler[0](parse_user_input(arguments), contacts)
+    elif necessary_handler[1] == '3args_note_commands':
+        return necessary_handler[0](arguments[0], arguments[1], arguments[2], contacts)
+    elif necessary_handler[1] == '2args_note_commands':
+        return necessary_handler[0](arguments[0], arguments[1], contacts)
 
 
 def parse_user_input(raw_contact: list) -> dict:
