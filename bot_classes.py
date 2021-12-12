@@ -142,6 +142,71 @@ class Email(Field):
         self.__value = new_email
 
 
+class Record:
+    """Records(contacts) in users contact book.
+    Only one name , birthday and email, but it can be more than one phone and more than one address"""
+
+    def __init__(self, name: str,
+                 phones: List[str] = None,
+                 birthday: str = None,
+                 addresses: List[str] = None,
+                 email: str = None) -> None:
+        self.phone = []
+        if phones is not None:
+            for p in phones:
+                new_phone = Phone()
+                new_phone.value = p
+                self.phone.append(new_phone)
+        self.address = []
+        if addresses is not None:
+            for this_address in addresses:
+                new_address = Address()
+                new_address.value = this_address
+                self.address.append(new_address)
+        self.name = Name()
+        self.name.value = name
+        if birthday is not None:
+            self.birthday = Birthday()
+            self.birthday.value = birthday
+        else:
+            self.birthday = None
+        if email is not None:
+            self.email = Email()
+            self.email.value = email
+        else:
+            self.email = None
+
+    def days_to_birthday(self) -> int:
+        if self.birthday is not None:
+            current_date = datetime.now().date()
+            this_year_birthday = datetime(
+                year=current_date.year,
+                month=self.birthday.value.month,
+                day=self.birthday.value.day,
+            ).date()
+            if current_date > this_year_birthday:
+                this_year_birthday = datetime(
+                    year=current_date.year + 1,
+                    month=self.birthday.value.month,
+                    day=self.birthday.value.day,
+                ).date()
+            return (this_year_birthday - current_date).days
+
+    def __str__(self) -> str:
+        phones = ', '.join([p.value for p in self.phone]) if len(
+            self.phone) > 0 else 'None'
+        birthday = self.birthday.value.strftime(
+            '%d.%m.%Y') if self.birthday is not None else 'None'
+        addresses = ', '.join([addr.value for addr in self.address]) if len(
+            self.address) > 0 else 'None'
+        email = self.email.value if self.email is not None else 'None'
+        return f"\n|Record of {self.name.value} :\n" \
+               f"|phones : {phones}\n" \
+               f"|birthday : {birthday}\n" \
+               f"|addresses : {addresses}\n" \
+               f"|email : {email}\n"
+
+
 class AddressBook(UserDict):
     """All contacts data"""
 

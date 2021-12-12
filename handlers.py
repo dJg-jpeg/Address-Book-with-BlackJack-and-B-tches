@@ -47,7 +47,25 @@ def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
 
 
 def goodbye() -> str:
+
     return 'Good bye!'
+
+
+def add_note(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.add_note(note, tag)
+    return f"Successfully added '{note}' to {contact['name']} contact"
+
+
+def delete_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    contact.delete_note(note)
+    return f"You've successfully deleted '{note}' note for the {contact['name']} contact"
+
+
+def find_note(note: str, contact: bot_classes.Record) -> Optional[bot_classes.Note]:
+    found_note = contact.find_note(note)
+    return found_note
 
 
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
@@ -72,6 +90,10 @@ COMMANDS = {
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
+    'add_note': [add_note, 'add_note_command'],
+    'delete_note': [delete_note, 'note_commands'],
+    'find_note': [find_note, 'note_commands'],
+
 }
 
 COMMAND_ARGS = {
@@ -90,4 +112,8 @@ COMMAND_ARGS = {
     'goodbye': None,
     'exit': None,
     'close': None,
+    'add_note': 'name of the contact, note, tag',
+    'delete_note': 'name of the contact, note',
+    'find_note': 'name of the contact, note',
+
 }
