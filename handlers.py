@@ -51,46 +51,47 @@ def goodbye() -> str:
     return 'Good bye!'
 
 
-def add_note(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+def add_note(name: str, note: str, tag: Optional[list[str]], contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     contact.add_note(note, tag)
-    return f"Successfully added '{note}' to {contact['name']} contact"
+    return f"Successfully added '{note}' to {contact.name.value} contact"
 
 
 def delete_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     contact.delete_note(note)
-    return f"You've successfully deleted '{note}' note for the {contact['name']} contact"
+    return f"You've successfully deleted '{note}' note for the {contact.name.value} contact"
 
 
-def find_note(name: str, note: str, contacts_book: bot_classes.AddressBook) -> Optional[bot_classes.Note]:
+def see_notes(name: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    found_note = contact.get_note(note)
-    return found_note
+    all_notes_by_contact = '\n'.join([str(c_note) for c_note in contact.note])
+    return f"All notes for {name} contact : \n\n" \
+           f"{all_notes_by_contact}"
 
 
 def change_note(name: str, note: str, new_note: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     contact.modify_note(note, new_note)
-    return f"Successfully modified '{note}' to '{new_note}' for {contact['name']} contact"
+    return f"Successfully modified '{note}' to '{new_note}' for {contact.name.value} contact"
 
 
-def add_tag(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+def add_tag(name: str, note: str, tag: Optional[list[str]], contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    note = contact.get_note(note)
-    note.add_tag(tag)
-    return f"Successfully added '{tag}' to '{note}' of the {contact['name']}contact"
+    contact_note = contact.get_note(note)
+    contact_note.add_tag(tag[0])
+    return f"Successfully added '{tag[0]}' to '{note}' of the {contact.name.value} contact"
 
 
 def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    notes = list(contact.note.values())
     found_notes = []
-    for note in notes:
-        merged_tags = ' '.join([p.value for p in note.tag])
+    for note in contact.note:
+        merged_tags = ' '.join([t.value for t in note.tag])
         if tag in merged_tags:
-            found_notes.add(note)
-    return f"Here are the list of the notes for the {contact['name']} contact with '{tag}' tag: {found_notes}"
+            found_notes.append(note.value)
+    return f"Here are the list of the notes for the " \
+           f"{contact.name.value} contact with '{tag}' tag: {' ; '.join(found_notes)}"
 
 
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
@@ -110,6 +111,7 @@ COMMANDS = {
     'find_contact': [find_contact, 'one_argument_book_commands'],
     'delete_contact': [delete_contact, 'one_argument_book_commands'],
     'birthdays_from_now': [get_birthdays_list, 'one_argument_book_commands'],
+    'see_notes': [see_notes, 'one_argument_book_commands'],
     'sort_dir': [dir_sort, 'sort_commands'],
     'show_all': [show_all, 'only_book_commands'],
     'goodbye': [goodbye, 'none_argument_commands'],
@@ -117,8 +119,7 @@ COMMANDS = {
     'close': [goodbye, 'none_argument_commands'],
     'add_note': [add_note, '3args_note_commands'],
     'delete_note': [delete_note, '2args_note_commands'],
-    'find_note': [find_note, '2args_note_commands'],
-    'add_tag': [add_note, '3args_note_commands'],
+    'add_tag': [add_tag, '3args_note_commands'],
     'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
     'change_note': [change_note, '3args_note_commands'],
 }
@@ -139,9 +140,9 @@ COMMAND_ARGS = {
     'goodbye': None,
     'exit': None,
     'close': None,
-    'add_note': 'name of the contact, note, tag',
+    'add_note': 'name of the contact, note, tags(optional)',
     'delete_note': 'name of the contact, note',
-    'find_note': 'name of the contact, note',
+    'see_notes': 'name of the contact',
     'add_tag': 'name of the contact, note, tag to add',
     'find_notes_with_tag': 'name of the contact, tag',
     'change_note': 'name of the contact, note, new note'

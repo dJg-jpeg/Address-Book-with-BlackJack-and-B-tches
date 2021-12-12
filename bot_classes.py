@@ -33,7 +33,7 @@ class UnknownContactError(Exception):
 
 
 class UnknownNoteError(Exception):
-    """Unknown contact in contact book"""
+    """Unknown note in contact book"""
 
 
 class ZeroDaysError(Exception):
@@ -104,28 +104,24 @@ class Tag(Field):
 class Note(Field):
     """Notes of the contact"""
 
-    def __init__(self, value, tag: List[Tag] = None):
-        if tag is None:
-            self.tag = []
-        else:
-            self.tag = [Tag(p) for p in tag]
-        super(Note, self).__init__(value)
+    def __init__(self, tags: List[str] = None):
+        super(Note, self).__init__()
+        self.tag = []
+        if len(tags) > 0:
+            for this_tag in tags:
+                new_tag = Tag()
+                new_tag.value = this_tag
+                self.tag .append(new_tag)
 
     def __str__(self):
-        return f"The note is '{self.value}'. And the tags are {[p.value for p in self.tag]}"
-
-    @property
-    def value(self) -> str:
-        return self.__value
-
-    @value.setter
-    def value(self, value: str) -> None:
-        self.__value = value
+        return f"The note is '{self.value}'. And the tags are {','.join([p.value for p in self.tag])}"
 
     def add_tag(self, input_tag: str) -> None:
-        tag = Tag(input_tag)
-        if tag not in self.tag:
-            self.tag.append(tag)
+        all_tags = [tag.value for tag in self.tag]
+        if input_tag not in all_tags:
+            new_tag = Tag()
+            new_tag.value = input_tag
+            self.tag.append(new_tag)
 
 
 class Address(Field):
@@ -155,7 +151,7 @@ class Record:
                  birthday: str = None,
                  addresses: List[str] = None,
                  email: str = None,
-                 note: List[str] = None) -> None:
+                 notes: List[str] = None) -> None:
         self.phone = []
         if phones is not None:
             for p in phones:
@@ -180,10 +176,12 @@ class Record:
             self.email.value = email
         else:
             self.email = None
-        if note is None:
-            self.note = []
-        else:
-            self.note = [Note(p) for p in note]
+        self.note = []
+        if notes is not None:
+            for this_note in notes:
+                new_note = Note()
+                new_note.value = this_note
+                self.phone.append(new_note)
 
     def days_to_birthday(self) -> int:
         if self.birthday is not None:
@@ -202,28 +200,31 @@ class Record:
             return (this_year_birthday - current_date).days
 
     def __str__(self) -> str:
-        phones = ', '.join([p.value for p in self.phone]) if len(
-            self.phone) > 0 else 'None'
-        birthday = self.birthday.value.strftime(
-            '%d.%m.%Y') if self.birthday is not None else 'None'
-        addresses = ', '.join([addr.value for addr in self.address]) if len(
-            self.address) > 0 else 'None'
+        phones = ', '.join([p.value for p in self.phone]) if len(self.phone) > 0 else 'None'
+        birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
+        addresses = ', '.join([addr.value for addr in self.address]) if len(self.address) > 0 else 'None'
         email = self.email.value if self.email is not None else 'None'
+        notes = ''
+        if len(self.note) > 0:
+            for note in self.note:
+                notes += f"/'{note.value}', tags: {', '.join([t.value for t in note.tag])}/ "
+            notes = notes.strip()
         return f"\n|Record of {self.name.value} :\n" \
-               f"|phones : {phones}\n" \
-               f"|birthday : {birthday}\n" \
-               f"|addresses : {addresses}\n" \
-               f"|email : {email}\n"
+            f"|phones : {phones}\n" \
+            f"|birthday : {birthday}\n" \
+            f"|addresses : {addresses}\n" \
+            f"|email : {email}\n" \
+            f"|notes : {notes}\n"
 
-    def add_note(self, input_note: str, input_tag: List[str] = None) -> None:
-        note_to_add = Note(input_note, input_tag)
+    def add_note(self, input_note: str, input_tag: Optional[List[str]] = None) -> None:
+        note_to_add = Note(input_tag)
+        note_to_add.value = input_note
         self.note.append(note_to_add)
-        return [p.value for p in self.note]
 
     def get_note(self, note: str) -> Optional[Note]:
-        for p in self.note:
-            if p.value == note:
-                return p
+        for this_note in self.note:
+            if this_note.value == note:
+                return this_note
         else:
             raise UnknownNoteError
 
@@ -232,19 +233,16 @@ class Record:
         note_to_modify.value = new_note
 
     def delete_note(self, note: str) -> None:
-        note_to_delete = self.find_note(note)
-        self.note.remove(note_to_delete) if note_to_delete else None
+        note_to_delete = self.get_note(note)
+        self.note.remove(note_to_delete)
 
 
 class AddressBook(UserDict):
     """All contacts data"""
 
     def add_record(self, record: dict) -> None:
-        new_record = Record(name=record['name'],
-                            phones=record['numbers'],
-                            birthday=record['birthday'],
-                            addresses=record['address'],
-                            email=record['email'])
+        new_record = Record(name=record['name'], phones=record['numbers'], birthday=record['birthday'],
+                            addresses=record['address'], email=record['email'])
         self.data[new_record.name.value] = new_record
 
     def find_record(self, sought_string: str) -> dict:
@@ -274,23 +272,18 @@ class AddressBook(UserDict):
                 contact_addresses = row['addresses'].split(
                     ',') if row['addresses'] != 'None' else None
                 contact_email = row['email'] if row['email'] != 'None' else None
-                self.data[row['name']] = Record(row['name'],
-                                                contact_phones,
-                                                contact_birthday,
-                                                contact_addresses,
-                                                contact_email
-                                                )
+                self.data[row['name']] = Record(row['name'], contact_phones, contact_birthday, contact_addresses,
+                                                contact_email)
 
     def save(self) -> None:
         with open(CONTACTS_PATH, 'w') as tw:
             contacts_writer = csv.DictWriter(tw, FIELD_NAMES, )
             contacts_writer.writeheader()
             for name, record in self.data.items():
-                contact_phones = ','.join([p.value for p in record.phone]) if len(
-                    record.phone) > 0 else 'None'
+                contact_phones = ','.join([p.value for p in record.phone]) \
+                    if len(record.phone) > 0 else 'None'
                 if record.birthday is not None:
-                    contact_birthday = record.birthday.value.strftime(
-                        "%d.%m.%Y")
+                    contact_birthday = record.birthday.value.strftime("%d.%m.%Y")
                 else:
                     contact_birthday = 'None'
                 contact_addresses = ','.join(

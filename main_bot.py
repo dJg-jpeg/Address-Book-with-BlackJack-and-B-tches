@@ -55,10 +55,10 @@ def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List
         return necessary_handler[0](arguments[0])
     elif necessary_handler[1] == 'contact_commands':
         return necessary_handler[0](parse_user_input(arguments), contacts)
-    elif necessary_handler[1] == '3args_note_commands':
-        return necessary_handler[0](arguments[0], arguments[1], arguments[2], contacts)
     elif necessary_handler[1] == '2args_note_commands':
         return necessary_handler[0](arguments[0], arguments[1], contacts)
+    elif necessary_handler[1] == '3args_note_commands':
+        return necessary_handler[0](arguments[0], arguments[1], arguments[2:], contacts)
 
 
 def parse_user_input(raw_contact: list) -> dict:
@@ -86,7 +86,8 @@ def main() -> None:
     address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
-          'For example : \n add \n name , phones, birthday\n')
+          'For example : \n add_contact \n name , phones, birthday\n\n'
+          'For more details input "help" or "hello"')
     while bot_answer != 'Good bye!':
         command = ((input("Input command :")).lower()).strip()
         try:
