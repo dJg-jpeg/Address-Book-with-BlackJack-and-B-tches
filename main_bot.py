@@ -16,6 +16,9 @@ def input_error(func):
         except bot_classes.UnknownContactError:
             return "No contact with such name in contact book, " \
                    "please try input different name"
+        except bot_classes.UnknownNoteError:
+            return "No such note for this contact, " \
+                   "please try input different note"
         except bot_classes.PhoneError:
             return "Phone number must starts from + " \
                    "and phone must contain only digits" \

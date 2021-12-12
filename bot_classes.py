@@ -154,7 +154,8 @@ class Record:
                  phones: List[str] = None,
                  birthday: str = None,
                  addresses: List[str] = None,
-                 email: str = None) -> None:
+                 email: str = None,
+                 note: List[str] = None) -> None:
         self.phone = []
         if phones is not None:
             for p in phones:
@@ -179,6 +180,10 @@ class Record:
             self.email.value = email
         else:
             self.email = None
+        if note is None:
+            self.note = []
+        else:
+            self.note = [Note(p) for p in note]
 
     def days_to_birthday(self) -> int:
         if self.birthday is not None:
