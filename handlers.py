@@ -49,11 +49,15 @@ def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
 def goodbye() -> str:
     return 'Good bye!'
 
-def days_from_now(self, days) -> int:
-    days = input('how many days from now would you like to lookup birthdays for?')
+
+def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
+    try:
+        days = int(days)
+    except ValueError:
+        raise bot_classes.LiteralsInDaysError
     if days < 0:
-        raise Exception('Days should be more than 0. Try again')
-    self.days_from_now = days
+        raise bot_classes.ZeroDaysError
+    return contacts_book.birthday_list(days)
 
 
 COMMANDS = {
@@ -62,12 +66,12 @@ COMMANDS = {
     'add_contact': [add_contact, 'contact_commands'],
     'find_contact': [find_contact, 'one_argument_book_commands'],
     'delete_contact': [delete_contact, 'one_argument_book_commands'],
+    'birthdays_from_now': [get_birthdays_list, 'one_argument_book_commands'],
     'sort_dir': [dir_sort, 'sort_commands'],
     'show_all': [show_all, 'only_book_commands'],
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
-    'get_birthday_list': [birthday_list, 'birthday_commands']
 }
 
 COMMAND_ARGS = {
@@ -81,9 +85,9 @@ COMMAND_ARGS = {
     'find_contact': 'find request',
     'sort_dir': 'path to directory you want to sort',
     'delete_contact': 'name of the contact you want to delete',
+    'birthdays_from_now': 'how many days from now would you like to lookup birthdays for?',
     'show_all': None,
     'goodbye': None,
     'exit': None,
     'close': None,
-    'days_from_now': 'how many days from now would you like to lookup birthdays for?'
 }

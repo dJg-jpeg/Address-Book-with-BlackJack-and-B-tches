@@ -29,6 +29,10 @@ def input_error(func):
         except bot_classes.InvalidDirectoryPathError:
             return 'It is not a directory , ' \
                    'please insert a valid directory path'
+        except bot_classes.ZeroDaysError:
+            return 'Please input more than zero days, try again'
+        except bot_classes.LiteralsInDaysError:
+            return 'Please input only numbers'
         return answer
 
     return wrapper

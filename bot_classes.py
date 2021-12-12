@@ -1,10 +1,8 @@
 from collections import UserDict
 from datetime import datetime
-from datetime import timedelta
 from typing import List
 import re
 import csv
-
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email')
 CONTACTS_PATH = 'contact_book.csv'
@@ -32,6 +30,14 @@ class InvalidDirectoryPathError(Exception):
 
 class UnknownContactError(Exception):
     """Unknown contact in contact book"""
+
+
+class ZeroDaysError(Exception):
+    """Days should be more than 0"""
+
+
+class LiteralsInDaysError(Exception):
+    """Literals were inputted in amount of days argument"""
 
 
 class Field:
@@ -136,6 +142,22 @@ class Record:
         else:
             self.email = None
 
+    def days_to_birthday(self) -> int:
+        if self.birthday is not None:
+            current_date = datetime.now().date()
+            this_year_birthday = datetime(
+                year=current_date.year,
+                month=self.birthday.value.month,
+                day=self.birthday.value.day,
+            ).date()
+            if current_date > this_year_birthday:
+                this_year_birthday = datetime(
+                    year=current_date.year + 1,
+                    month=self.birthday.value.month,
+                    day=self.birthday.value.day,
+                ).date()
+            return (this_year_birthday - current_date).days
+
     def __str__(self) -> str:
         phones = ', '.join([p.value for p in self.phone]) if len(self.phone) > 0 else 'None'
         birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
@@ -164,7 +186,7 @@ class AddressBook(UserDict):
                     'by_phone': [],
                     'by_email': [],
                     'by_address': [],
-                    }   
+                    }
         for name, record in self.data.items():
             if sought_string in name:
                 findings['by_name'].append(str(record))
@@ -225,13 +247,13 @@ class AddressBook(UserDict):
     def delete_record(self, name: str) -> None:
         self.get_record_by_name(name)
         self.data.pop(name)
-        
-        
-    def birthday_list(self, days_from_now: int) -> list:
+
+    def birthday_list(self, days_from_now: int) -> str:
         birthdays_in_future = []
-        now = datetime.datetime.now()
-        future_birthdays = now + timedelta(days=days_from_now)
         for name, record in self.data.items():
-            if self.birthday.value == future_birthdays:
-               birthdays_in_future.append(name)
-        return f'These people have Birthdays in {days_from_now}: {",".join(birthdays_in_future)}'
+            if record.birthday is not None:
+                if record.days_to_birthday() == days_from_now:
+                    birthdays_in_future.append(name)
+        return f'These people have birthdays in ' \
+               f'{days_from_now} days from now: ' \
+               f'{",".join(birthdays_in_future) if len(birthdays_in_future) != 0 else "None"}'
