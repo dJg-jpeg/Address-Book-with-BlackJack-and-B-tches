@@ -1,5 +1,6 @@
 from collections import UserDict
 from datetime import datetime
+from datetime import timedelta
 from typing import List
 import re
 import csv
@@ -224,3 +225,13 @@ class AddressBook(UserDict):
     def delete_record(self, name: str) -> None:
         self.get_record_by_name(name)
         self.data.pop(name)
+        
+        
+    def birthday_list(self, days_from_now: int) -> list:
+        birthdays_in_future = []
+        now = datetime.datetime.now()
+        future_birthdays = now + timedelta(days=days_from_now)
+        for name, record in self.data.items():
+            if self.birthday.value == future_birthdays:
+               birthdays_in_future.append(name)
+        return f'These people have Birthdays in {days_from_now}: {",".join(birthdays_in_future)}'

@@ -49,6 +49,12 @@ def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
 def goodbye() -> str:
     return 'Good bye!'
 
+def days_from_now(self, days) -> int:
+    days = input('how many days from now would you like to lookup birthdays for?')
+    if days < 0:
+        raise Exception('Days should be more than 0. Try again')
+    self.days_from_now = days
+
 
 COMMANDS = {
     'hello': [greetings, 'none_argument_commands'],
@@ -61,6 +67,7 @@ COMMANDS = {
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
+    'get_birthday_list': [birthday_list, 'birthday_commands']
 }
 
 COMMAND_ARGS = {
@@ -78,4 +85,5 @@ COMMAND_ARGS = {
     'goodbye': None,
     'exit': None,
     'close': None,
+    'days_from_now': 'how many days from now would you like to lookup birthdays for?'
 }
