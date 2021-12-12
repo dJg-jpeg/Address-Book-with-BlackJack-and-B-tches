@@ -68,6 +68,13 @@ def find_note(note: str, contact: bot_classes.Record) -> Optional[bot_classes.No
     return found_note
 
 
+def add_tag(name: str, note: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    note = contact.get_note(note)
+    note.add_tag(tag)
+    return f"Successfully added '{tag}' to '{note}' of the {contact['name']}contact"
+
+
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
     try:
         days = int(days)
@@ -90,9 +97,10 @@ COMMANDS = {
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
-    'add_note': [add_note, 'add_note_command'],
+    'add_note': [add_note, 'add_note_tag_command'],
     'delete_note': [delete_note, 'note_commands'],
     'find_note': [find_note, 'note_commands'],
+    'add_tag': [add_note, 'add_note_tag_command'],
 
 }
 
@@ -115,5 +123,5 @@ COMMAND_ARGS = {
     'add_note': 'name of the contact, note, tag',
     'delete_note': 'name of the contact, note',
     'find_note': 'name of the contact, note',
-
+    'add_tag': 'name of the contact, note, tag to add',
 }

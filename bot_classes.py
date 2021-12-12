@@ -32,6 +32,10 @@ class UnknownContactError(Exception):
     """Unknown contact in contact book"""
 
 
+class UnknownNoteError(Exception):
+    """Unknown contact in contact book"""
+
+
 class ZeroDaysError(Exception):
     """Days should be more than 0"""
 
@@ -206,6 +210,22 @@ class Record:
                f"|addresses : {addresses}\n" \
                f"|email : {email}\n"
 
+    def add_note(self, input_note: str, input_tag: List[str] = None) -> None:
+        note_to_add = Note(input_note, input_tag)
+        self.note.append(note_to_add)
+        return [p.value for p in self.note]
+
+    def get_note(self, note: str) -> Optional[Note]:
+        for p in self.note:
+            if p.value == note:
+                return p
+            else:
+                raise UnknownNoteError
+
+    def delete_note(self, note: str) -> None:
+        note_to_delete = self.find_note(note)
+        self.note.remove(note_to_delete) if note_to_delete else None
+
 
 class AddressBook(UserDict):
     """All contacts data"""
@@ -298,17 +318,3 @@ class AddressBook(UserDict):
         return f'These people have birthdays in ' \
                f'{days_from_now} days from now: ' \
                f'{",".join(birthdays_in_future) if len(birthdays_in_future) != 0 else "None"}'
-
-    def add_note(self, input_note: str, input_tag: List[str] = None) -> None:
-        note_to_add = Note(input_note, input_tag)
-        self.note.append(note_to_add)
-        return [p.value for p in self.note]
-
-    def find_note(self, note: str) -> Optional[Note]:
-        for p in self.note:
-            if p.value == note:
-                return p
-
-    def delete_note(self, note: str) -> None:
-        note_to_delete = self.find_note(note)
-        self.note.remove(note_to_delete) if note_to_delete else None
