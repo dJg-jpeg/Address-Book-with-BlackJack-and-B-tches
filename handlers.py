@@ -87,10 +87,10 @@ def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressB
     notes = list(contact.note.values())
     found_notes = []
     for note in notes:
-        merged_notes = ' '.join([p.value for p in contact.note])
-        if tag in merged_notes:
+        merged_tags = ' '.join([p.value for p in note.tag])
+        if tag in merged_tags:
             found_notes.add(note)
-    return f"Here are the list of the notes for the {contact['name']}contact with '{tag}' tag: {found_notes}"
+    return f"Here are the list of the notes for the {contact['name']} contact with '{tag}' tag: {found_notes}"
 
 
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
