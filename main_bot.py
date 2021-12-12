@@ -13,8 +13,12 @@ def input_error(func):
         except bot_classes.ExistContactError:
             return "This contact already exists, " \
                    "if you want to change number please use command change"
+        except bot_classes.UnknownContactError:
+            return "No contact with such name in contact book, " \
+                   "please try input different name"
         except bot_classes.PhoneError:
-            return "Phone number must starts from + and phone must contain only digits" \
+            return "Phone number must starts from + " \
+                   "and phone must contain only digits" \
                    ", please try again"
         except bot_classes.BirthdayError:
             return "Data must match pattern 'day.month.year', " \
@@ -22,6 +26,13 @@ def input_error(func):
         except bot_classes.EmailError:
             return "You are trying to input invalid email address, " \
                    "please try again"
+        except bot_classes.InvalidDirectoryPathError:
+            return 'It is not a directory , ' \
+                   'please insert a valid directory path'
+        except bot_classes.ZeroDaysError:
+            return 'Please input more than zero days, try again'
+        except bot_classes.LiteralsInDaysError:
+            return 'Please input only numbers'
         return answer
 
     return wrapper
@@ -30,11 +41,15 @@ def input_error(func):
 @input_error
 def get_handler(contacts: bot_classes.AddressBook, command: str, arguments: List[str] = None) -> str:
     if arguments is None:
-        necessary_handler = handlers.COMMANDS[command][0]
-        return necessary_handler()
+        necessary_handler = handlers.COMMANDS[command]
+        if necessary_handler[1] == 'only_book_commands':
+            return necessary_handler[0](contacts)
+        return necessary_handler[0]()
     necessary_handler = handlers.COMMANDS[command]
-    if necessary_handler[1] == 'find_commands':
+    if necessary_handler[1] == 'one_argument_book_commands':
         return necessary_handler[0](arguments[0], contacts)
+    elif necessary_handler[1] == 'sort_commands':
+        return necessary_handler[0](arguments[0])
     elif necessary_handler[1] == 'contact_commands':
         return necessary_handler[0](parse_user_input(arguments), contacts)
 
@@ -47,7 +62,7 @@ def parse_user_input(raw_contact: list) -> dict:
                       'email': None,
                       }
     for attribute in raw_contact[1:]:
-        if attribute.startswith('+'):
+        if attribute.startswith('+') or attribute.isalnum():
             parsed_contact['numbers'].append(attribute)
         elif '@' in attribute:
             parsed_contact['email'] = attribute
@@ -61,6 +76,7 @@ def parse_user_input(raw_contact: list) -> dict:
 def main() -> None:
     bot_answer = ''
     address_book = bot_classes.AddressBook()
+    address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
           'For example : \n add \n name , phones, birthday\n')
@@ -77,6 +93,8 @@ def main() -> None:
             bot_answer = get_handler(address_book, command, user_args)
         else:
             bot_answer = get_handler(address_book, command)
+        if bot_answer == 'Good bye!':
+            address_book.save()
         print(bot_answer)
 
 

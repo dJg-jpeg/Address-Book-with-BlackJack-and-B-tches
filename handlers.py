@@ -1,5 +1,6 @@
 import bot_classes
 from typing import Optional
+import dir_sorter
 
 
 def greetings() -> str:
@@ -32,15 +33,42 @@ def find_contact(find_string: str, contacts_book: bot_classes.AddressBook) -> st
            f"\n\n{''.join(findings['by_address']) if len(findings['by_address']) > 0 else 'Nothing found'}\n"
 
 
+def dir_sort(path_to_dir: str) -> str:
+    return dir_sorter.sort_dir(path_to_dir)
+
+
+def show_all(contacts_book: bot_classes.AddressBook) -> str:
+    return contacts_book.see_all_contacts()
+
+
+def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
+    contacts_book.delete_record(name)
+    return f"Successfully deleted {name} contact"
+
+
 def goodbye() -> str:
     return 'Good bye!'
+
+
+def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
+    try:
+        days = int(days)
+    except ValueError:
+        raise bot_classes.LiteralsInDaysError
+    if days < 0:
+        raise bot_classes.ZeroDaysError
+    return contacts_book.birthday_list(days)
 
 
 COMMANDS = {
     'hello': [greetings, 'none_argument_commands'],
     'help': [greetings, 'none_argument_commands'],
     'add_contact': [add_contact, 'contact_commands'],
-    'find_contact': [find_contact, 'find_commands'],
+    'find_contact': [find_contact, 'one_argument_book_commands'],
+    'delete_contact': [delete_contact, 'one_argument_book_commands'],
+    'birthdays_from_now': [get_birthdays_list, 'one_argument_book_commands'],
+    'sort_dir': [dir_sort, 'sort_commands'],
+    'show_all': [show_all, 'only_book_commands'],
     'goodbye': [goodbye, 'none_argument_commands'],
     'exit': [goodbye, 'none_argument_commands'],
     'close': [goodbye, 'none_argument_commands'],
@@ -55,6 +83,10 @@ COMMAND_ARGS = {
                    'address/addresses(optional), '
                    'email(optional) separating them by ,',
     'find_contact': 'find request',
+    'sort_dir': 'path to directory you want to sort',
+    'delete_contact': 'name of the contact you want to delete',
+    'birthdays_from_now': 'how many days from now would you like to lookup birthdays for?',
+    'show_all': None,
     'goodbye': None,
     'exit': None,
     'close': None,
