@@ -84,20 +84,19 @@ def add_tag(name: str, note: str, tag: Optional[list[str]], contacts_book: bot_c
 
 def find_notes_with_tag(name: str, tag: str, sort_type: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    notes = list(contact.note.values())
     found_notes = []
-    for note in notes:
+    for note in contact.note:
         merged_tags = ' '.join([p.value for p in note.tag])
         if tag in merged_tags:
             found_notes.append(note.value)
-    if sort_type == 'newest':
+    if sort_type[0] == 'newest':
         found_notes.reverse()
-    elif sort_type == 'name':
-        found_notes.sort()
-    elif sort_type == 'length':
-        found_notes.sort(key=len)
+    elif sort_type[0] == 'name':
+        found_notes.sort(reverse=True)
+    elif sort_type[0] == 'length':
+        found_notes.sort(key=len, reverse=False)
     return f"Here are the list of the notes for the " \
-           f"{contact.name.value} contact with '{tag}' tag: {' ; '.join(found_notes)}"
+           f"{contact.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
 
 
 def search_notes(name: str, search_symbols: str, contacts_book: bot_classes.AddressBook) -> str:
@@ -160,7 +159,9 @@ COMMAND_ARGS = {
     'delete_note': 'name of the contact, note , separating them by ,',
     'see_notes': 'name of the contact',
     'add_tag': 'name of the contact, note, tag to add, separating them by ,',
-    'find_notes_with_tag': 'name of the contact, tag, type of the sort ("newest", "name", "length") separating them by ,',
+    'find_notes_with_tag': 'name of the contact, tag, '
+                           'type of the sort '
+                           '("newest", "name", "length")(default: "oldest"), separating them by ,',
     'change_note': 'name of the contact, note, new note, separating them by ,',
     'search_notes': 'name of the contact, searched symbols, separating them by ,',
 }
