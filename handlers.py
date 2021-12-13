@@ -93,6 +93,12 @@ def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressB
     return f"Here are the list of the notes for the {contact['name']} contact with '{tag}' tag: {found_notes}"
 
 
+def search_notes(name: str, search_symbols: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    found_notes = contact.search_for_notes(search_symbols)
+    return f"Here are the list of the notes for the {contact['name']} contact with '{search_symbols}' symbols: {found_notes}"
+
+
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
     try:
         days = int(days)
@@ -121,6 +127,7 @@ COMMANDS = {
     'add_tag': [add_note, '3args_note_commands'],
     'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
     'change_note': [change_note, '3args_note_commands'],
+    'search_notes': [search_notes, '2args_note_commands'],
 }
 
 COMMAND_ARGS = {
@@ -144,5 +151,6 @@ COMMAND_ARGS = {
     'find_note': 'name of the contact, note',
     'add_tag': 'name of the contact, note, tag to add',
     'find_notes_with_tag': 'name of the contact, tag',
-    'change_note': 'name of the contact, note, new note'
+    'change_note': 'name of the contact, note, new note',
+    'search_notes': 'name of the contact, searched symbols',
 }
