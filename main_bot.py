@@ -3,6 +3,7 @@ import handlers
 import bot_classes
 import re
 from typing import List
+from difflib import get_close_matches
 
 
 def input_error(func):
@@ -83,6 +84,10 @@ def parse_user_input(raw_contact: list) -> dict:
     return parsed_contact
 
 
+def get_most_close_commands(command: str) -> list[str]:
+    return get_close_matches(command, list(handlers.COMMANDS.keys()))
+
+
 def main() -> None:
     bot_answer = ''
     address_book = bot_classes.AddressBook()
@@ -96,7 +101,13 @@ def main() -> None:
         try:
             args_for_command = handlers.COMMAND_ARGS[command]
         except KeyError:
-            print("I don't know such command, please try again(")
+            close_commands = get_most_close_commands(command)
+            if len(close_commands) != 0:
+                close_commands = ', '.join(close_commands)
+                print(f"Seems like you'd missprinted this command. "
+                      f"The most close commands to your input are: \n {close_commands}")
+            else:
+                print("I don't know such command, please try again(")
             continue
         if args_for_command is not None:
             user_args = (input(f"Input {args_for_command} :")).split(',')
