@@ -4,7 +4,7 @@ from typing import Optional, List
 import re
 import csv
 
-FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email')
+FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
 CONTACTS_PATH = 'contact_book.csv'
 
 
@@ -272,8 +272,18 @@ class AddressBook(UserDict):
                 contact_addresses = row['addresses'].split(
                     ',') if row['addresses'] != 'None' else None
                 contact_email = row['email'] if row['email'] != 'None' else None
-                self.data[row['name']] = Record(row['name'], contact_phones, contact_birthday, contact_addresses,
-                                                contact_email)
+                if row['notes'] != 'None':
+                    raw_notes = (row['notes'].split(','))[:-1]
+                    self.data[row['name']] = Record(row['name'], contact_phones, contact_birthday, contact_addresses,
+                                                    contact_email)
+                    contact = self.get_record_by_name(row['name'])
+                    for this_note in raw_notes:
+                        this_note = this_note.split('|tags:|')
+                        this_note[1] = (this_note[1].split('/|'))
+                        contact.add_note(this_note[0], this_note[1])
+                else:
+                    self.data[row['name']] = Record(row['name'], contact_phones, contact_birthday, contact_addresses,
+                                                    contact_email, None)
 
     def save(self) -> None:
         with open(CONTACTS_PATH, 'w') as tw:
@@ -289,12 +299,21 @@ class AddressBook(UserDict):
                 contact_addresses = ','.join(
                     [addr.value for addr in record.address]
                 ) if len(record.address) > 0 else 'None'
+                notes = ''
+                if len(record.note) != 0:
+                    for this_note in record.note:
+                        notes += f'{this_note.value}' \
+                                 f'|tags:|' \
+                                 f'{"/|".join([t.value for t in this_note.tag]) if len(this_note.tag) > 0 else ""},'
+                else:
+                    notes = 'None'
                 contact_email = record.email.value if record.email is not None else 'None'
                 contacts_writer.writerow({'name': name,
                                           'numbers': contact_phones,
                                           'birthday': contact_birthday,
                                           'addresses': contact_addresses,
                                           'email': contact_email,
+                                          'notes': notes,
                                           })
 
     def see_all_contacts(self) -> str:

@@ -70,10 +70,10 @@ def see_notes(name: str, contacts_book: bot_classes.AddressBook) -> str:
            f"{all_notes_by_contact}"
 
 
-def change_note(name: str, note: str, new_note: str, contacts_book: bot_classes.AddressBook) -> str:
+def change_note(name: str, note: str, new_note: list[str], contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    contact.modify_note(note, new_note)
-    return f"Successfully modified '{note}' to '{new_note}' for {contact.name.value} contact"
+    contact.modify_note(note, new_note[0])
+    return f"Successfully modified '{note}' to '{new_note[0]}' for {contact.name.value} contact"
 
 
 def add_tag(name: str, note: str, tag: Optional[list[str]], contacts_book: bot_classes.AddressBook) -> str:

@@ -36,6 +36,9 @@ def input_error(func):
             return 'Please input more than zero days, try again'
         except bot_classes.LiteralsInDaysError:
             return 'Please input only numbers'
+        except IndexError:
+            return "Seems you haven't inputted obligatory arguments for the command, " \
+                   "or you have inputted too much arguments. Please try again"
         return answer
 
     return wrapper
