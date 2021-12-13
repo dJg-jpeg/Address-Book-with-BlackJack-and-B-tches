@@ -47,7 +47,6 @@ def delete_contact(name: str, contacts_book: bot_classes.AddressBook) -> str:
 
 
 def goodbye() -> str:
-
     return 'Good bye!'
 
 
@@ -94,6 +93,15 @@ def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressB
            f"{contact.name.value} contact with '{tag}' tag: {' ; '.join(found_notes)}"
 
 
+def search_notes(name: str, search_symbols: str, contacts_book: bot_classes.AddressBook) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    found_notes = contact.search_for_notes(search_symbols)
+    found_notes = '\n\n' + '\n'.join([str(f_note) for f_note in found_notes])
+    return f"Here are the list of the notes for the " \
+           f"{name} contact with '{search_symbols}' symbols: " \
+           f"{found_notes}"
+
+
 def get_birthdays_list(days: str, contacts_book: bot_classes.AddressBook) -> str:
     try:
         days = int(days)
@@ -121,6 +129,8 @@ COMMANDS = {
     'delete_note': [delete_note, '2args_note_commands'],
     'add_tag': [add_tag, '3args_note_commands'],
     'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
+    'change_note': [change_note, '3args_note_commands'],
+    'search_notes': [search_notes, '2args_note_commands'],
 }
 
 COMMAND_ARGS = {
@@ -144,5 +154,6 @@ COMMAND_ARGS = {
     'see_notes': 'name of the contact',
     'add_tag': 'name of the contact, note, tag to add',
     'find_notes_with_tag': 'name of the contact, tag',
-    'change_note': 'name of the contact, note, new note'
+    'change_note': 'name of the contact, note, new note',
+    'search_notes': 'name of the contact, searched symbols',
 }

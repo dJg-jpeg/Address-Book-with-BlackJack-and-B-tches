@@ -114,7 +114,7 @@ class Note(Field):
                 self.tag .append(new_tag)
 
     def __str__(self):
-        return f"{self.value}"
+        return f"The note is '{self.value}'. And the tags are {','.join([p.value for p in self.tag])}"
 
     def add_tag(self, input_tag: str) -> None:
         all_tags = [tag.value for tag in self.tag]
@@ -235,6 +235,13 @@ class Record:
     def delete_note(self, note: str) -> None:
         note_to_delete = self.get_note(note)
         self.note.remove(note_to_delete)
+
+    def search_for_notes(self, search_symbols: str) -> List[Note]:
+        found_notes = []
+        for note in self.note:
+            if search_symbols in note.value:
+                found_notes.append(note)
+        return found_notes
 
 
 class AddressBook(UserDict):
