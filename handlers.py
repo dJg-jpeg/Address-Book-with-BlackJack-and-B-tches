@@ -82,13 +82,20 @@ def add_tag(name: str, note: str, tag: Optional[list[str]], contacts_book: bot_c
     return f"Successfully added '{tag[0]}' to '{note}' of the {contact.name.value} contact"
 
 
-def find_notes_with_tag(name: str, tag: str, contacts_book: bot_classes.AddressBook) -> str:
+def find_notes_with_tag(name: str, tag: str, sort_type: str, contacts_book: bot_classes.AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
+    notes = list(contact.note.values())
     found_notes = []
-    for note in contact.note:
-        merged_tags = ' '.join([t.value for t in note.tag])
+    for note in notes:
+        merged_tags = ' '.join([p.value for p in note.tag])
         if tag in merged_tags:
             found_notes.append(note.value)
+    if sort_type == 'newest':
+        found_notes.reverse()
+    elif sort_type == 'name':
+        found_notes.sort()
+    elif sort_type == 'length':
+        found_notes.sort(key=len)
     return f"Here are the list of the notes for the " \
            f"{contact.name.value} contact with '{tag}' tag: {' ; '.join(found_notes)}"
 
@@ -128,7 +135,7 @@ COMMANDS = {
     'add_note': [add_note, '3args_note_commands'],
     'delete_note': [delete_note, '2args_note_commands'],
     'add_tag': [add_tag, '3args_note_commands'],
-    'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
+    'find_notes_with_tag': [find_notes_with_tag, '3args_note_commands'],
     'change_note': [change_note, '3args_note_commands'],
     'search_notes': [search_notes, '2args_note_commands'],
 }
@@ -153,7 +160,7 @@ COMMAND_ARGS = {
     'delete_note': 'name of the contact, note , separating them by ,',
     'see_notes': 'name of the contact',
     'add_tag': 'name of the contact, note, tag to add, separating them by ,',
-    'find_notes_with_tag': 'name of the contact, tag, separating them by ,',
+    'find_notes_with_tag': 'name of the contact, tag, type of the sort ("newest", "name", "length") separating them by ,',
     'change_note': 'name of the contact, note, new note, separating them by ,',
     'search_notes': 'name of the contact, searched symbols, separating them by ,',
 }
