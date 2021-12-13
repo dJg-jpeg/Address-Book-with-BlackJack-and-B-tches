@@ -121,7 +121,6 @@ COMMANDS = {
     'delete_note': [delete_note, '2args_note_commands'],
     'add_tag': [add_tag, '3args_note_commands'],
     'find_notes_with_tag': [find_notes_with_tag, '2args_note_commands'],
-    'change_note': [change_note, '3args_note_commands'],
 }
 
 COMMAND_ARGS = {
