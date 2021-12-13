@@ -114,7 +114,7 @@ class Note(Field):
                 self.tag .append(new_tag)
 
     def __str__(self):
-        return f"The note is '{self.value}'. And the tags are {','.join([p.value for p in self.tag])}"
+        return f"{self.value}"
 
     def add_tag(self, input_tag: str) -> None:
         all_tags = [tag.value for tag in self.tag]
