@@ -1,6 +1,7 @@
-from bot_classes import AddressBook
-from bot_exceptions import ExistContactError, LiteralsInDaysError, ZeroDaysError, UnknownFieldError
-from dir_sorter import sort_dir
+from .bot_classes_and_exceptions.bot_classes import AddressBook
+from .bot_classes_and_exceptions.bot_exceptions import ExistContactError, \
+    LiteralsInDaysError, ZeroDaysError, UnknownFieldError, InvalidDirectoryPathError
+from .dir_sort_scrypt.dir_sorter import sort_dir
 from typing import Optional
 
 COMMANDS = (
@@ -44,7 +45,10 @@ def find_contact(find_string: str, contacts_book: AddressBook) -> str:
 
 
 def dir_sort(path_to_dir: str) -> str:
-    return sort_dir(path_to_dir)
+    message = sort_dir(path_to_dir)
+    if not message:
+        raise InvalidDirectoryPathError
+    return message
 
 
 def show_all(contacts_book: AddressBook) -> str:

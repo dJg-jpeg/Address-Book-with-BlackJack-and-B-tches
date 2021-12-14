@@ -1,4 +1,4 @@
-import handlers
+from . import handlers
 from frozendict import frozendict
 
 # args for commands , that user can see

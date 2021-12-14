@@ -1,8 +1,7 @@
 from pathlib import Path
 import re
 import shutil
-from bot_exceptions import InvalidDirectoryPathError
-from typing import Generator, List, Tuple, Any
+from typing import Generator, List, Tuple, Any, Optional
 
 FOLDERS_NAMES = ('image', 'video', 'audio', 'document', 'archive', 'unknown')
 FILE_TYPES_EXTENSIONS = (
@@ -105,7 +104,7 @@ def normalize(name: str) -> str:
     return rx.sub('_', name.translate(map_cyr_to_latin))
 
 
-def sort_dir(dir_name: str) -> str:
+def sort_dir(dir_name: str) -> Optional[str]:
     p = Path(dir_name)
     if p.is_dir():
         all_files = find_all_files(p.iterdir(), [[], [], [], [], [], []])
@@ -113,6 +112,6 @@ def sort_dir(dir_name: str) -> str:
         new_dirs = make_dirs(p)
         move_files(all_files, new_dirs)
         remove_empty_dirs(p.iterdir())
-        return f"Sorted successfully , go check your folder)"
+        return "Sorted successfully , go check your folder)"
     else:
-        raise InvalidDirectoryPathError
+        return None

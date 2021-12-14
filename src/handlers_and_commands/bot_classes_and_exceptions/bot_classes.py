@@ -1,12 +1,12 @@
 from collections import UserDict
 from datetime import datetime
 from typing import Optional, List
-import bot_exceptions
+from . import bot_exceptions
 from re import search
 from csv import DictReader, DictWriter
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
-CONTACTS_PATH = 'contact_book.csv'
+CONTACTS_PATH = r'C:\GoIT\GoIT_Files\Address-Book-with-BlackJack-and-B-tches\contact_book.csv'
 
 
 class Name:
