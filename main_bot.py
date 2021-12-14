@@ -26,7 +26,7 @@ def get_handler(
         elif category == '2args_commands':
             return handler(arguments[0], arguments[1], contacts)
         elif category == '3args_commands':
-            return handler(arguments[0], arguments[1], arguments[2:], contacts)
+            return handler(arguments[0], arguments[1], contacts, arguments[2:])
         elif category == '4args_commands':
             if len(arguments) == 4:
                 return handler(arguments[0], arguments[1], arguments[3], contacts, arguments[2])
@@ -84,7 +84,7 @@ def parse_user_input(raw_contact: list) -> dict:
         'email': None,
     }
     for attribute in raw_contact[1:]:
-        if attribute.startswith('+') or attribute.isalnum():
+        if attribute.startswith('+') or attribute.isdigit():
             parsed_contact['numbers'].append(attribute)
         elif '@' in attribute:
             parsed_contact['email'] = attribute
@@ -125,8 +125,9 @@ def main() -> None:
             raw_user_args = input(f"Input {args_for_command} :")
             split_user_args = raw_user_args.split(',')
             user_args = [arg.strip() for arg in split_user_args]
-            bot_answer = get_handler(
-                address_book, handler, category, user_args)
+            if prepared_command == 'find_notes_with_tag' and len(user_args) == 2:
+                category = '2args_commands'
+            bot_answer = get_handler(address_book, handler, category, user_args)
         else:
             bot_answer = get_handler(address_book, handler, category)
         if bot_answer == 'Good bye!':

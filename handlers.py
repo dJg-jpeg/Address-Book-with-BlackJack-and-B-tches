@@ -9,7 +9,6 @@ COMMANDS = (
     'add_contact', 'find_contact', 'delete_contact', 'show_all', 'edit_contact', 'add_info',
     'birthdays_from_now',
     'see_notes', 'add_note', 'delete_note', 'add_tag', 'find_notes_with_tag', 'change_note', 'search_for_notes',
-    'edit_contact', 'add_info',
     'sort_dir',
 )
 
@@ -35,13 +34,13 @@ def find_contact(find_string: str, contacts_book: AddressBook) -> str:
     found_contacts = contacts_book.find_record(find_string)
     return f"By the '{find_string}' request bot found contacts :\n" \
            f"\n\tIn name :" \
-           f"\n\n{''.join(found_contacts['by_name']) if len(found_contacts['by_name']) > 0 else 'Nothing found'}\n" \
+           f"\n{''.join(found_contacts['by_name']) if len(found_contacts['by_name']) > 0 else 'Nothing found'}\n" \
            f"\n\tIn phone number/numbers :" \
-           f"\n\n{''.join(found_contacts['by_phone']) if len(found_contacts['by_phone']) > 0 else 'Nothing found'}\n" \
+           f"\n{''.join(found_contacts['by_phone']) if len(found_contacts['by_phone']) > 0 else 'Nothing found'}\n" \
            f"\n\tIn email :" \
-           f"\n\n{''.join(found_contacts['by_email']) if len(found_contacts['by_email']) > 0 else 'Nothing found'}\n" \
+           f"\n{''.join(found_contacts['by_email']) if len(found_contacts['by_email']) > 0 else 'Nothing found'}\n" \
            f"\n\tIn address/addresses :" \
-           f"\n\n{''.join(found_contacts['by_address']) if len(found_contacts['by_address']) > 0 else 'Nothing found'}"
+           f"\n{''.join(found_contacts['by_address']) if len(found_contacts['by_address']) > 0 else 'Nothing found'}\n"
 
 
 def dir_sort(path_to_dir: str) -> str:
@@ -64,8 +63,8 @@ def goodbye() -> str:
 def add_note(
         name: str,
         note: str,
+        contacts_book: AddressBook,
         tag: list[str] or list,
-        contacts_book: AddressBook
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
     contact.add_note(note, tag)
@@ -88,8 +87,8 @@ def see_notes(name: str, contacts_book: AddressBook) -> str:
 def change_note(
         name: str,
         old_note: str,
+        contacts_book: AddressBook,
         new_note: list[str],
-        contacts_book: AddressBook
 ) -> str:
     note_to_add = new_note[0]
     contact = contacts_book.get_record_by_name(name)
@@ -100,8 +99,8 @@ def change_note(
 def add_tag(
         name: str,
         note: str,
+        contacts_book: AddressBook,
         tag: list[str],
-        contacts_book: AddressBook
 ) -> str:
     tag_to_add = tag[0]
     contact = contacts_book.get_record_by_name(name)
@@ -113,8 +112,8 @@ def add_tag(
 def find_notes_with_tag(
         name: str,
         tag: str,
-        sort_type: str,
-        contacts_book: AddressBook
+        contacts_book: AddressBook,
+        sort_type: Optional[str] = None,
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
     found_notes = []
@@ -122,12 +121,13 @@ def find_notes_with_tag(
         merged_tags = ' '.join([this_tag.value for this_tag in note.tag])
         if tag in merged_tags:
             found_notes.append(note.value)
-    if sort_type[0] == 'newest':
-        found_notes.reverse()
-    elif sort_type[0] == 'name':
-        found_notes.sort(reverse=True)
-    elif sort_type[0] == 'length':
-        found_notes.sort(key=len, reverse=False)
+    if sort_type:
+        if sort_type[0] == 'newest':
+            found_notes.reverse()
+        elif sort_type[0] == 'name':
+            found_notes.sort(reverse=True)
+        elif sort_type[0] == 'length':
+            found_notes.sort(key=len, reverse=False)
     return f"Here are the list of the notes for the " \
            f"{contact.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
 
@@ -176,8 +176,8 @@ def edit_contact(
 def add_info(
         name: str,
         field: str,
+        contacts_book: AddressBook,
         new_value: list[str],
-        contacts_book: AddressBook
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
     if field == 'phone':
