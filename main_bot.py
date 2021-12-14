@@ -89,7 +89,7 @@ def get_most_close_commands(command: str) -> list[str]:
 
 
 def main() -> None:
-    bot_answer = ''
+    bot_answer = None
     address_book = bot_classes.AddressBook()
     address_book.load()
     print('Welcome! '
