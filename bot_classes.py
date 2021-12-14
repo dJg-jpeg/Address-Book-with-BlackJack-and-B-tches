@@ -23,7 +23,8 @@ class Birthday:
         try:
             self.value = datetime.strptime(birthday, "%d.%m.%Y")
         except (ValueError, TypeError):
-            raise bot_exceptions.BirthdayError("Data must match pattern '%d.%m.%Y'")
+            raise bot_exceptions.BirthdayError(
+                "Data must match pattern '%d.%m.%Y'")
 
 
 class Phone:
@@ -50,7 +51,8 @@ class Tag:
 class Note:
     """Notes of the contact"""
 
-    def __init__(self, note: str, tags: List[str] or list) -> None:  # list of strings or empty list
+    # list of strings or empty list
+    def __init__(self, note: str, tags: List[str] or list) -> None:
         self.value = note
         self.tag = []
         if len(tags) > 0:
@@ -127,9 +129,12 @@ class Record:
             return (this_year_birthday - current_date).days
 
     def __str__(self) -> str:
-        phones = ', '.join([phone.value for phone in self.phone]) if len(self.phone) > 0 else 'None'
-        birthday = self.birthday.value.strftime('%d.%m.%Y') if self.birthday is not None else 'None'
-        addresses = ', '.join([addr.value for addr in self.address]) if len(self.address) > 0 else 'None'
+        phones = ', '.join([phone.value for phone in self.phone]) if len(
+            self.phone) > 0 else 'None'
+        birthday = self.birthday.value.strftime(
+            '%d.%m.%Y') if self.birthday is not None else 'None'
+        addresses = ', '.join([addr.value for addr in self.address]) if len(
+            self.address) > 0 else 'None'
         email = self.email.value if self.email is not None else 'None'
         notes = ''
         if len(self.note) > 0:
@@ -169,6 +174,55 @@ class Record:
                 found_notes.append(note)
         return found_notes
 
+    def modify_email(self, new_email: str) -> None:
+        email_to_modify = self.email
+        print(email_to_modify)
+        email_to_modify.value = new_email
+
+    def modify_name(self, new_name: str) -> None:
+        name_to_modify = self.name
+        name_to_modify.value = new_name
+
+    def modify_phone(self, old_phone: str, new_phone: str) -> None:
+        if self.phone:
+            for phone in self.phone:
+                if phone.value == old_phone:
+                    phone.value = new_phone
+                    return None
+            else:
+                raise bot_exceptions.UnknownPhoneError
+        else:
+            new_phone_object = Phone()
+            new_phone_object.value = new_phone
+            self.address.append(new_phone_object)
+
+    def modify_address(self, old_address: str, new_address: str) -> None:
+        if self.address:
+            for address in self.address:
+                if address.value == old_address:
+                    address.value = new_address
+                    return None
+            else:
+                raise bot_exceptions.UnknownAddressError
+        else:
+            new_address_object = Address()
+            new_address_object.value = new_address
+            self.address.append(new_address_object)
+
+    def modify_birthday(self, new_birthday: str) -> None:
+        birthday_to_modify = self.birthday
+        birthday_to_modify.value = new_birthday
+
+    def add_phone(self, new_phone: str) -> None:
+        phone_to_add = Phone()
+        phone_to_add.value = new_phone
+        self.phone.append(phone_to_add)
+
+    def add_address(self, new_address: str) -> None:
+        address_to_add = Address()
+        address_to_add.value = new_address
+        self.address.append(address_to_add)
+
 
 class AddressBook(UserDict):
     """All contacts data"""
@@ -200,9 +254,11 @@ class AddressBook(UserDict):
         with open(CONTACTS_PATH, 'r') as tr:
             contacts_reader = DictReader(tr)
             for row in contacts_reader:
-                contact_phones = row['numbers'].split(',') if row['numbers'] != 'None' else None
+                contact_phones = row['numbers'].split(
+                    ',') if row['numbers'] != 'None' else None
                 contact_birthday = row['birthday'] if row['birthday'] != 'None' else None
-                contact_addresses = row['addresses'].split(',') if row['addresses'] != 'None' else None
+                contact_addresses = row['addresses'].split(
+                    ',') if row['addresses'] != 'None' else None
                 contact_email = row['email'] if row['email'] != 'None' else None
                 if row['notes'] != 'None':
                     raw_notes = (row['notes'].split(','))[:-1]
@@ -225,7 +281,8 @@ class AddressBook(UserDict):
                 contact_phones = ','.join([phone.value for phone in record.phone]) \
                     if len(record.phone) > 0 else 'None'
                 if record.birthday is not None:
-                    contact_birthday = record.birthday.value.strftime("%d.%m.%Y")
+                    contact_birthday = record.birthday.value.strftime(
+                        "%d.%m.%Y")
                 else:
                     contact_birthday = 'None'
                 contact_addresses = ','.join(

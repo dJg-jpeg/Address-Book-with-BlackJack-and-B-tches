@@ -23,10 +23,13 @@ def get_handler(
             return handler(arguments[0])
         elif category == 'contact_commands':
             return handler(parse_user_input(arguments), contacts)
-        elif category == '2args_note_commands':
+        elif category == '2args_commands':
             return handler(arguments[0], arguments[1], contacts)
-        elif category == '3args_note_commands':
+        elif category == '3args_commands':
             return handler(arguments[0], arguments[1], arguments[2:], contacts)
+        elif category == '4args_commands':
+            return handler(arguments[0], arguments[1], arguments[2], arguments[3:], contacts)
+
     except bot_exceptions.ExistContactError:
         return "This contact already exists, " \
                "if you want to change number please use command change"
@@ -36,6 +39,15 @@ def get_handler(
     except bot_exceptions.UnknownNoteError:
         return "No such note for this contact, " \
                "please try input different note"
+    except bot_exceptions.UnknownFieldError:
+        return "No such field, " \
+               "please try next time to input name, phone, birthday, address or email "
+    except bot_exceptions.UnknownPhoneError:
+        return "No such phone for this contact, " \
+               "please try input different phone"
+    except bot_exceptions.UnknownAddressError:
+        return "No such address for this contact, " \
+               "please try input different phone"
     except bot_exceptions.PhoneError:
         return "Phone number must starts from + " \
                "and phone must contain only digits" \
@@ -108,7 +120,8 @@ def main() -> None:
             raw_user_args = input(f"Input {args_for_command} :")
             split_user_args = raw_user_args.split(',')
             user_args = [arg.strip() for arg in split_user_args]
-            bot_answer = get_handler(address_book, handler, category, user_args)
+            bot_answer = get_handler(
+                address_book, handler, category, user_args)
         else:
             bot_answer = get_handler(address_book, handler, category)
         if bot_answer == 'Good bye!':

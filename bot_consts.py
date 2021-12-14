@@ -46,6 +46,11 @@ CHANGE_NOTE = 'name of the contact, note, new note, separating them by ,'
 
 SEARCH_FOR_NOTES = 'name of the contact, searched symbols, separating them by ,'
 
+EDIT_CONTACT = 'name of the contact, field to edit, old value (" " for name, email and birthday), '\
+               'new value, separating them by,'
+
+ADD_INFO = 'name of the contact, field to add (phone or address), new value, separating them by,'
+
 # command functions with categories and arguments to input in command
 
 COMMANDS = frozendict({
@@ -61,10 +66,12 @@ COMMANDS = frozendict({
     'goodbye': (handlers.goodbye, 'none_argument_commands', GOODBYE),
     'exit': (handlers.goodbye, 'none_argument_commands', EXIT),
     'close': (handlers.goodbye, 'none_argument_commands', CLOSE),
-    'add_note': (handlers.add_note, '3args_note_commands', ADD_NOTE),
-    'delete_note': (handlers.delete_note, '2args_note_commands', DELETE_NOTE),
-    'add_tag': (handlers.add_tag, '3args_note_commands', ADD_TAG),
-    'find_notes_with_tag': (handlers.find_notes_with_tag, '3args_note_commands', FIND_NOTES_WITH_TAG),
-    'change_note': (handlers.change_note, '3args_note_commands', CHANGE_NOTE),
-    'search_for_notes': (handlers.search_for_notes, '2args_note_commands', SEARCH_FOR_NOTES),
+    'add_note': (handlers.add_note, '3args_commands', ADD_NOTE),
+    'delete_note': (handlers.delete_note, '2args_commands', DELETE_NOTE),
+    'add_tag': (handlers.add_tag, '3args_commands', ADD_TAG),
+    'find_notes_with_tag': (handlers.find_notes_with_tag, '3args_commands', FIND_NOTES_WITH_TAG),
+    'change_note': (handlers.change_note, '3args_commands', CHANGE_NOTE),
+    'search_for_notes': (handlers.search_for_notes, '2args_commands', SEARCH_FOR_NOTES),
+    'edit_contact': [handlers.edit_contact, '4args_commands', EDIT_CONTACT],
+    'add_info': [handlers.add_info, '3args_commands', ADD_INFO],
 })

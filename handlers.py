@@ -1,5 +1,5 @@
 from bot_classes import AddressBook
-from bot_exceptions import ExistContactError, LiteralsInDaysError, ZeroDaysError
+from bot_exceptions import ExistContactError, LiteralsInDaysError, ZeroDaysError, UnknownFieldError
 from dir_sorter import sort_dir
 
 COMMANDS = (
@@ -8,6 +8,7 @@ COMMANDS = (
     'add_contact', 'find_contact', 'delete_contact', 'show_all',
     'birthdays_from_now',
     'see_notes', 'add_note', 'delete_note', 'add_tag', 'find_notes_with_tag', 'change_note', 'search_for_notes',
+    'edit_contact', 'add_info',
     'sort_dir',
 )
 
@@ -133,7 +134,8 @@ def find_notes_with_tag(
 def search_for_notes(name: str, search_symbols: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     found_notes = contact.search_for_notes(search_symbols)
-    found_notes = '\n\n' + '\n'.join([str(find_note) for find_note in found_notes])
+    found_notes = '\n\n' + '\n'.join([str(find_note)
+                                     for find_note in found_notes])
     return f"Here are the list of the notes for the " \
            f"{name} contact with '{search_symbols}' symbols: " \
            f"{found_notes}"
@@ -147,3 +149,42 @@ def get_birthdays_by_days(days: str, contacts_book: AddressBook) -> str:
     if days < 0:
         raise ZeroDaysError
     return contacts_book.get_birthdays_by_days(days)
+
+
+def edit_contact(
+        name: str,
+        field: str,
+        old_value: str,
+        new_value: str,
+        contacts_book: AddressBook
+) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    if field == 'name':
+        contact.modify_name(new_value[0])
+    elif field == 'phone':
+        contact.modify_phone(old_value, new_value[0])
+    elif field == 'birthday':
+        contact.modify_birthday(new_value[0])
+    elif field == 'address':
+        contact.modify_address(old_value, new_value[0])
+    elif field == 'email':
+        contact.modify_email(new_value[0])
+    else:
+        raise UnknownFieldError
+    return f"Successfully modified {field} to '{new_value[0]}' of the {name} contact"
+
+
+def add_info(
+        name: str,
+        field: str,
+        new_value: str,
+        contacts_book: AddressBook
+) -> str:
+    contact = contacts_book.get_record_by_name(name)
+    if field == 'phone':
+        contact.add_phone(new_value[0])
+    elif field == 'address':
+        contact.add_address(new_value[0])
+    else:
+        raise UnknownFieldError
+    return f"Successfully added '{new_value[0]}' to {field}s of the {name} contact"

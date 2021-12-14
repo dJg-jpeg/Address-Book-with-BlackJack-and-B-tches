@@ -32,3 +32,15 @@ class ZeroDaysError(Exception):
 
 class LiteralsInDaysError(Exception):
     """Literals were inputted in amount of days argument"""
+
+
+class UnknownPhoneError(Exception):
+    """Unknown phone for selected contact"""
+
+
+class UnknownFieldError(Exception):
+    """Unknown field"""
+
+
+class UnknownAddressError(Exception):
+    """Unknown phone for selected contact"""
