@@ -46,7 +46,7 @@ CHANGE_NOTE = 'name of the contact, note, new note, separating them by ,'
 
 SEARCH_FOR_NOTES = 'name of the contact, searched symbols, separating them by ,'
 
-EDIT_CONTACT = 'name of the contact, field to edit, old value (" " for name, email and birthday), '\
+EDIT_CONTACT = 'name of the contact, field to edit, old value (skip this for email and birthday), '\
                'new value, separating them by,'
 
 ADD_INFO = 'name of the contact, field to add (phone or address), new value, separating them by,'

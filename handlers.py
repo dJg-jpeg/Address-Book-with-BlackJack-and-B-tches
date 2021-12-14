@@ -1,11 +1,12 @@
 from bot_classes import AddressBook
 from bot_exceptions import ExistContactError, LiteralsInDaysError, ZeroDaysError, UnknownFieldError
 from dir_sorter import sort_dir
+from typing import Optional
 
 COMMANDS = (
     'hello', 'help',
     'goodbye', 'exit', 'close',
-    'add_contact', 'find_contact', 'delete_contact', 'show_all',
+    'add_contact', 'find_contact', 'delete_contact', 'show_all', 'edit_contact', 'add_info',
     'birthdays_from_now',
     'see_notes', 'add_note', 'delete_note', 'add_tag', 'find_notes_with_tag', 'change_note', 'search_for_notes',
     'edit_contact', 'add_info',
@@ -154,30 +155,28 @@ def get_birthdays_by_days(days: str, contacts_book: AddressBook) -> str:
 def edit_contact(
         name: str,
         field: str,
-        old_value: str,
         new_value: str,
-        contacts_book: AddressBook
+        contacts_book: AddressBook,
+        old_value: Optional[str] = None,
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
-    if field == 'name':
-        contact.modify_name(new_value[0])
-    elif field == 'phone':
-        contact.modify_phone(old_value, new_value[0])
+    if field == 'phone':
+        contact.modify_phone(old_value, new_value)
     elif field == 'birthday':
-        contact.modify_birthday(new_value[0])
+        contact.modify_birthday(new_value)
     elif field == 'address':
-        contact.modify_address(old_value, new_value[0])
+        contact.modify_address(old_value, new_value)
     elif field == 'email':
-        contact.modify_email(new_value[0])
+        contact.modify_email(new_value)
     else:
         raise UnknownFieldError
-    return f"Successfully modified {field} to '{new_value[0]}' of the {name} contact"
+    return f"Successfully modified {field} from '{old_value}' to '{new_value}' of the {name} contact"
 
 
 def add_info(
         name: str,
         field: str,
-        new_value: str,
+        new_value: list[str],
         contacts_book: AddressBook
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
@@ -187,4 +186,4 @@ def add_info(
         contact.add_address(new_value[0])
     else:
         raise UnknownFieldError
-    return f"Successfully added '{new_value[0]}' to {field}s of the {name} contact"
+    return f"Successfully added '{new_value[0]}' to {field} field of the {name} contact"

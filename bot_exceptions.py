@@ -39,8 +39,8 @@ class UnknownPhoneError(Exception):
 
 
 class UnknownFieldError(Exception):
-    """Unknown field"""
+    """Unknown field for selected contact"""
 
 
 class UnknownAddressError(Exception):
-    """Unknown phone for selected contact"""
+    """Unknown address for selected contact"""

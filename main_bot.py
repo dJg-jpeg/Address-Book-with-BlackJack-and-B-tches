@@ -28,7 +28,10 @@ def get_handler(
         elif category == '3args_commands':
             return handler(arguments[0], arguments[1], arguments[2:], contacts)
         elif category == '4args_commands':
-            return handler(arguments[0], arguments[1], arguments[2], arguments[3:], contacts)
+            if len(arguments) == 4:
+                return handler(arguments[0], arguments[1], arguments[3], contacts, arguments[2])
+            else:
+                return handler(arguments[0], arguments[1], arguments[2], contacts)
 
     except bot_exceptions.ExistContactError:
         return "This contact already exists, " \
@@ -39,9 +42,6 @@ def get_handler(
     except bot_exceptions.UnknownNoteError:
         return "No such note for this contact, " \
                "please try input different note"
-    except bot_exceptions.UnknownFieldError:
-        return "No such field, " \
-               "please try next time to input name, phone, birthday, address or email "
     except bot_exceptions.UnknownPhoneError:
         return "No such phone for this contact, " \
                "please try input different phone"
@@ -65,6 +65,11 @@ def get_handler(
         return 'Please input more than zero days, try again'
     except bot_exceptions.LiteralsInDaysError:
         return 'Please input only numbers'
+    except bot_exceptions.UnknownFieldError:
+        return 'No such field for the contact ' \
+               '(if add_info , accepted are phone or address, ' \
+               'if edit_contact, accepted are phone, address, birthday and email)' \
+               ', please try again'
     except IndexError:
         return "Seems you haven't inputted obligatory arguments for the command, " \
                "or you have inputted too much arguments. Please try again"

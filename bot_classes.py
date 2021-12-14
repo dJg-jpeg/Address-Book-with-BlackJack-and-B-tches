@@ -175,13 +175,7 @@ class Record:
         return found_notes
 
     def modify_email(self, new_email: str) -> None:
-        email_to_modify = self.email
-        print(email_to_modify)
-        email_to_modify.value = new_email
-
-    def modify_name(self, new_name: str) -> None:
-        name_to_modify = self.name
-        name_to_modify.value = new_name
+        self.email = Email(new_email)
 
     def modify_phone(self, old_phone: str, new_phone: str) -> None:
         if self.phone:
@@ -189,12 +183,9 @@ class Record:
                 if phone.value == old_phone:
                     phone.value = new_phone
                     return None
-            else:
-                raise bot_exceptions.UnknownPhoneError
+            raise bot_exceptions.UnknownPhoneError
         else:
-            new_phone_object = Phone()
-            new_phone_object.value = new_phone
-            self.address.append(new_phone_object)
+            self.add_phone(new_phone)
 
     def modify_address(self, old_address: str, new_address: str) -> None:
         if self.address:
@@ -202,26 +193,18 @@ class Record:
                 if address.value == old_address:
                     address.value = new_address
                     return None
-            else:
-                raise bot_exceptions.UnknownAddressError
+            raise bot_exceptions.UnknownAddressError
         else:
-            new_address_object = Address()
-            new_address_object.value = new_address
-            self.address.append(new_address_object)
+            self.add_address(new_address)
 
     def modify_birthday(self, new_birthday: str) -> None:
-        birthday_to_modify = self.birthday
-        birthday_to_modify.value = new_birthday
+        self.birthday = Birthday(new_birthday)
 
     def add_phone(self, new_phone: str) -> None:
-        phone_to_add = Phone()
-        phone_to_add.value = new_phone
-        self.phone.append(phone_to_add)
+        self.phone.append(Phone(new_phone))
 
     def add_address(self, new_address: str) -> None:
-        address_to_add = Address()
-        address_to_add.value = new_address
-        self.address.append(address_to_add)
+        self.address.append(Address(new_address))
 
 
 class AddressBook(UserDict):
