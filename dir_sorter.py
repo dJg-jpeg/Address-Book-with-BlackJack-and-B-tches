@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 import shutil
-from bot_classes import InvalidDirectoryPathError
+from bot_exceptions import InvalidDirectoryPathError
 from typing import Generator, List, Tuple, Any
 
 FOLDERS_NAMES = ('image', 'video', 'audio', 'document', 'archive', 'unknown')
