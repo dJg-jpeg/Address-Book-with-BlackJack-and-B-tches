@@ -6,7 +6,7 @@ from re import search
 from csv import DictReader, DictWriter
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
-CONTACTS_PATH = r'C:\GoIT\GoIT_Files\Address-Book-with-BlackJack-and-B-tches\contact_book.csv'
+CONTACTS_PATH = r'C:\GoIT\GoIT_Files\address_book_with_blackjack_and_b_tches\contact_book.csv'
 
 
 class Name:
