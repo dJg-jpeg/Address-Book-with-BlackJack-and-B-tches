@@ -42,6 +42,7 @@ The bot will try to guess what command you were trying to use in case you misspe
 
 # Package contents
 
+* src folder - contains __init___ and setup file
 * bot_classes.py – contains description of all the Address Book bot classes and their methods
 * dir_sorter.py – a separate module to sort files in the directory to different folders by extensions
 * handlers.py – contains functions and methods that call for bot_classes.py Classes and methods, additional methods to manipulate Address Book contents.
@@ -78,18 +79,15 @@ To install Python package from [GitHub](https://github.com/dJg-jpeg/Address-Book
 
 > `git clone https://github.com/jkbr/httpie.git`
 
-Then run the main_bot.py file from that directory:
 
-> `sudo python main_bot.py install`
+Navigate to the package folder using ‘cd’ command in your command line or Terminal (or open a new Terminal from the Folder/Git Bash Here in the package folder for Windows).
+Install the script by running the following code in the Terminal:
 
+> `python setup.py install`
+> `pip install -e .`
 
+Now you can run the script from any directory by running
 
-# How to run the script?
-
-To run the bot script, navigate to the package folder using ‘cd’ command in your command line or Terminal (or open a new Terminal from the Folder/Git Bash Here in the package folder for Windows).
-
-Run the following command to prompt a Welcome message from the bot:
-
-> `python3 main_bot.py`
+> `book_bot`
 
 After you see the Welcome message from bot, type ‘hello’ or ‘help’ to see the list of commands available in the chatbot.
