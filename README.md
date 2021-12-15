@@ -41,12 +41,19 @@ This Address Book package works as a terminal/command line chatbot to help you s
 The bot will try to guess what command you were trying to use in case you misspelled it. The package can be run in from anywhere on the computer.
 
 # Package contents
+<<<<<<< Updated upstream
 
 * src folder - contains __init___ and setup file
 * bot_classes.py – contains description of all the Address Book bot classes and their methods
 * dir_sorter.py – a separate module to sort files in the directory to different folders by extensions
+=======
+#### The src folder contains:
+* handlers and commands file, 
+* bot_classes and exceptions file - contains description of all the Address Book bot classes and their methods and exceptions,
+* dir_sort_script.py – a separate module to sort files in the directory to different folders by extensions
+>>>>>>> Stashed changes
 * handlers.py – contains functions and methods that call for bot_classes.py Classes and methods, additional methods to manipulate Address Book contents.
-* main_bot.py – main script
+* main_bot.py – main script to run the bot
 
 # System Requirements
 ## Check if Python is installed on your system.
@@ -79,6 +86,7 @@ To install Python package from [GitHub](https://github.com/dJg-jpeg/Address-Book
 
 > `git clone https://github.com/jkbr/httpie.git`
 
+<<<<<<< Updated upstream
 
 Navigate to the package folder using ‘cd’ command in your command line or Terminal (or open a new Terminal from the Folder/Git Bash Here in the package folder for Windows).
 Install the script by running the following code in the Terminal:
@@ -89,5 +97,18 @@ Install the script by running the following code in the Terminal:
 Now you can run the script from any directory by running
 
 > `book_bot`
+=======
 
-After you see the Welcome message from bot, type ‘hello’ or ‘help’ to see the list of commands available in the chatbot.
+# How to run the script?
+
+To install and run the bot script, navigate to the package folder using ‘cd’ command in your command line or Terminal (or open a new Terminal from the Folder/Git Bash Here in the package folder for Windows)
+
+Run the following command to prompt a Welcome message from the bot:
+
+> `python main_bot.py install`
+> `pip install -e`
+
+Now the script can be used from any directory on your computer. 
+>>>>>>> Stashed changes
+
+> `main_bot`
