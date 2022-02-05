@@ -4,9 +4,10 @@ from typing import Optional, List
 from . import bot_exceptions
 from re import search
 from csv import DictReader, DictWriter
+from pathlib import Path
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
-CONTACTS_PATH = r'..\contact_book.csv'
+CONTACTS_PATH = Path(__file__).parent.absolute().parent.parent / Path("contact_book.csv")
 
 
 class Name:
