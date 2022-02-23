@@ -32,11 +32,6 @@ def add_contact(contact: dict, contacts_book: AddressBook) -> str:
     contact_for_output = ContactOutput(contacts_book[contact['name']])
     return f"You successfully added:\n" \
            f"\t{contact_for_output.prepare_data_for_output()}"
-    # return f"You successfully added {contact['name']} contact " \
-    #        f"with {','.join(contact['numbers'])} numbers, " \
-    #        f"{contact['birthday']} birthday, " \
-    #        f"{','.join(contact['address'])} address, " \
-    #        f"{contact['email']} email"
 
 
 def find_contact(find_string: str, contacts_book: AddressBook) -> str:
