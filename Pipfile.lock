@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "425fe035b6f6cf8e2322fb321da1a3858ed8e7145c2226b97151478c365a4b96"
+            "sha256": "9b98e3462fea29efde648a5881abb77c55b408de795fe1d64d490186527a6232"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,14 +16,6 @@
         ]
     },
     "default": {
-        "flake8": {
-            "hashes": [
-                "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d",
-                "sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d"
-            ],
-            "index": "pypi",
-            "version": "==4.0.1"
-        },
         "frozendict": {
             "hashes": [
                 "sha256:00ea9166aa68cc5feed05986206fdbf35e838a09cb3feef998cf35978ff8a803",
@@ -46,6 +38,16 @@
             ],
             "index": "pypi",
             "version": "==2.3.0"
+        }
+    },
+    "develop": {
+        "flake8": {
+            "hashes": [
+                "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d",
+                "sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d"
+            ],
+            "index": "pypi",
+            "version": "==4.0.1"
         },
         "mccabe": {
             "hashes": [
@@ -71,6 +73,5 @@
             "index": "pypi",
             "version": "==2.4.0"
         }
-    },
-    "develop": {}
+    }
 }
