@@ -1,34 +1,37 @@
-from .bot_classes_and_exceptions.bot_classes import AddressBook
+from .bot_classes_and_exceptions.bot_classes import AddressBook, ContactOutput
 from .bot_classes_and_exceptions.bot_exceptions import ExistContactError, \
     LiteralsInDaysError, ZeroDaysError, UnknownFieldError, InvalidDirectoryPathError
 from .dir_sort_scrypt.dir_sorter import sort_dir
 from typing import Optional
 
 COMMANDS = (
-    'hello', 'help',
-    'goodbye', 'exit', 'close',
-    'add_contact', 'find_contact', 'delete_contact', 'show_all', 'edit_contact', 'add_info',
+    ('hello', 'help'),
+    ('goodbye', 'exit', 'close'),
+    ('add_contact', 'find_contact', 'delete_contact', 'show_all', 'edit_contact', 'add_info'),
     'birthdays_from_now',
-    'see_notes', 'add_note', 'delete_note', 'add_tag', 'find_notes_with_tag', 'change_note', 'search_for_notes',
+    ('see_notes', 'add_note', 'delete_note', 'add_tag', 'find_notes_with_tag', 'change_note', 'search_for_notes'),
     'sort_dir',
 )
 
 
 def greetings() -> str:
     return f"Hi!\n" \
-           f"My list of commands is : {', '.join(COMMANDS)}\n" \
-           f"How can I help you?"
+           f"Here are the commands , separated by categories :\n" \
+           f"Need some help? : {', '.join(COMMANDS[0])}\n" \
+           f"Contact commands : {', '.join(COMMANDS[2])}\n" \
+           f"See contacts birthdays in inputted amount of days: {COMMANDS[3]}\n" \
+           f"Notes commands : {', '.join(COMMANDS[4])}\n" \
+           f"To sort directory by given path : {COMMANDS[5]}\n" \
+           f"Stop bot's work : {', '.join(COMMANDS[1])}\n"
 
 
 def add_contact(contact: dict, contacts_book: AddressBook) -> str:
     if contact['name'] in contacts_book.keys():
         raise ExistContactError
     contacts_book.add_record(contact)
-    return f"You successfully added {contact['name']} contact " \
-           f"with {','.join(contact['numbers'])} numbers, " \
-           f"{contact['birthday']} birthday, " \
-           f"{','.join(contact['address'])} address, " \
-           f"{contact['email']} email"
+    contact_for_output = ContactOutput(contacts_book[contact['name']])
+    return f"You successfully added:\n" \
+           f"\t{contact_for_output.prepare_data_for_output()}"
 
 
 def find_contact(find_string: str, contacts_book: AddressBook) -> str:
@@ -140,7 +143,7 @@ def search_for_notes(name: str, search_symbols: str, contacts_book: AddressBook)
     contact = contacts_book.get_record_by_name(name)
     found_notes = contact.search_for_notes(search_symbols)
     found_notes = '\n\n' + '\n'.join([str(find_note)
-                                     for find_note in found_notes])
+                                      for find_note in found_notes])
     return f"Here are the list of the notes for the " \
            f"{name} contact with '{search_symbols}' symbols: " \
            f"{found_notes}"

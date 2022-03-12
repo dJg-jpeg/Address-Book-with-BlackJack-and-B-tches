@@ -1,9 +1,9 @@
-from .handlers_and_commands.bot_classes_and_exceptions import bot_exceptions
-from .handlers_and_commands.bot_classes_and_exceptions.bot_classes import AddressBook
+from handlers_and_commands.bot_classes_and_exceptions import bot_exceptions
+from handlers_and_commands.bot_classes_and_exceptions.bot_classes import AddressBook
 from re import search
 from typing import List, Callable
 from difflib import get_close_matches
-from .handlers_and_commands.bot_consts import COMMANDS
+from handlers_and_commands.bot_consts import COMMANDS
 
 
 def get_handler(

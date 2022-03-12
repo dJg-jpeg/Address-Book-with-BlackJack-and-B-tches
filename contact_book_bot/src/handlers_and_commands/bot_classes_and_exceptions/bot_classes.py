@@ -5,9 +5,56 @@ from . import bot_exceptions
 from re import search
 from csv import DictReader, DictWriter
 from pathlib import Path
+from abc import abstractmethod, ABC
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
 CONTACTS_PATH = Path(__file__).parent.absolute().parent.parent / Path("contact_book.csv")
+
+
+class UserOutput(ABC):
+
+    def __init__(self, data):
+        """User output must contain data what to show to user"""
+        self.data = data
+
+    @abstractmethod
+    def prepare_data_for_output(self):
+        """This is the method that puts in readiness for outputting the data , that user requested to see"""
+
+
+class ContactOutput(UserOutput):
+
+    def prepare_data_for_output(self):
+        phones = 'None'
+        if len(self.data.phone) > 0:
+            phones = ', '.join([phone.value for phone in self.data.phone])
+        birthday = 'None'
+        if self.data.birthday:
+            birthday = self.data.birthday.value.strftime('%d.%m.%Y')
+        addresses = 'None'
+        if len(self.data.address) > 0:
+            addresses = ', '.join([addr.value for addr in self.data.address])
+        email = 'None'
+        if self.data.email:
+            email = self.data.email.value
+        notes = ''
+        if len(self.data.note) > 0:
+            for note in self.data.note:
+                notes += f"/'{note.value}', tags: {', '.join([tag.value for tag in note.tag])}/ "
+            notes = notes.strip()
+        return f"\n|Contact {self.data.name.value} :\n" \
+               f"|phones : {phones}\n" \
+               f"|birthday : {birthday}\n" \
+               f"|addresses : {addresses}\n" \
+               f"|email : {email}\n" \
+               f"|notes : {notes}\n"
+
+
+class NoteOutput(UserOutput):
+
+    def prepare_data_for_output(self):
+        return f"The note is '{self.data.value}'. And the tags are " \
+               f"{','.join([note_tag.value for note_tag in self.data.tag])}"
 
 
 class Name:
@@ -60,7 +107,8 @@ class Note:
             self.tag = [Tag(new_tag) for new_tag in tags]
 
     def __str__(self) -> str:
-        return f"The note is '{self.value}'. And the tags are {','.join([p.value for p in self.tag])}"
+        raw_note = NoteOutput(self)
+        return raw_note.prepare_data_for_output()
 
     def add_tag(self, input_tag: str) -> None:
         all_tags = [tag.value for tag in self.tag]
@@ -130,29 +178,8 @@ class Record:
             return (this_year_birthday - current_date).days
 
     def __str__(self) -> str:
-        phones = 'None'
-        if len(self.phone) > 0:
-            phones = ', '.join([phone.value for phone in self.phone])
-        birthday = 'None'
-        if self.birthday:
-            birthday = self.birthday.value.strftime('%d.%m.%Y')
-        addresses = 'None'
-        if len(self.address) > 0:
-            addresses = ', '.join([addr.value for addr in self.address])
-        email = 'None'
-        if self.email:
-            email = self.email.value
-        notes = ''
-        if len(self.note) > 0:
-            for note in self.note:
-                notes += f"/'{note.value}', tags: {', '.join([tag.value for tag in note.tag])}/ "
-            notes = notes.strip()
-        return f"\n|Record of {self.name.value} :\n" \
-               f"|phones : {phones}\n" \
-               f"|birthday : {birthday}\n" \
-               f"|addresses : {addresses}\n" \
-               f"|email : {email}\n" \
-               f"|notes : {notes}\n"
+        raw_record = ContactOutput(self)
+        return raw_record.prepare_data_for_output()
 
     def add_note(self, input_note: str, input_tag: Optional[List[str]] = None) -> None:
         note_to_add = Note(input_note, input_tag)
