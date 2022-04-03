@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 frozendict = "==2.3.0"
+sqlalchemy = "==1.4.34"
+alembic = "==1.7.7"
 
 [dev-packages]
 flake8 = "==4.0.1"
