@@ -47,7 +47,3 @@ class NoteTag(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     tag = Column(String)
     note_id = Column(Integer, ForeignKey(ContactNote.id, ondelete="CASCADE"))
-
-
-Base.metadata.create_all(contact_db_engine)
-Base.metadata.bind = contact_db_engine
