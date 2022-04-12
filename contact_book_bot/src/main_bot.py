@@ -70,6 +70,9 @@ def get_handler(
                '(if add_info , accepted are phone or address, ' \
                'if edit_contact, accepted are phone, address, birthday and email)' \
                ', please try again'
+    except bot_exceptions.ExistTagError:
+        return 'Such tag already exists for this note, ' \
+               'please try another tag'
     except IndexError:
         return "Seems you haven't inputted obligatory arguments for the command, " \
                "or you have inputted too much arguments. Please try again"

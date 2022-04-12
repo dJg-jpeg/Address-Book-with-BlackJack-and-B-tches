@@ -184,15 +184,13 @@ class Record:
         raw_record = ContactOutput(self)
         return raw_record.prepare_data_for_output()
 
+    @staticmethod
     def add_note(
-            self,
             input_note: str,
             contact: Contact,
             adding_note_session: ContactSession,
             input_tag: Optional[List[str]] = None,
     ) -> None:
-        note_to_add = Note(input_note, input_tag)
-        self.note.append(note_to_add)
         note_to_insert = ContactNote(
             note=input_note,
             tags=[NoteTag(tag=tag) for tag in input_tag] if input_tag else None
@@ -201,20 +199,34 @@ class Record:
         adding_note_session.commit()
         adding_note_session.close()
 
-    def get_note(self, note: str) -> Note:
-        for this_note in self.note:
-            if this_note.value == note:
+    @staticmethod
+    def get_note(note: str, contact) -> ContactNote:
+        for this_note in contact.notes:
+            if this_note.note == note:
                 return this_note
         else:
             raise bot_exceptions.UnknownNoteError
 
-    def modify_note(self, note: str, new_note: str) -> None:
-        note_to_modify = self.get_note(note)
-        note_to_modify.value = new_note
+    def add_tag_to_note(self, input_tag: str, note: str, contact: Contact, adding_tag_session: ContactSession) -> None:
+        required_note = self.get_note(note, contact)
+        if input_tag not in [contact_note_tag.tag for contact_note_tag in required_note.tags]:
+            required_note.tags.append(NoteTag(tag=input_tag))
+            adding_tag_session.commit()
+            adding_tag_session.close()
+        else:
+            raise bot_exceptions.ExistTagError
 
-    def delete_note(self, note: str) -> None:
-        note_to_delete = self.get_note(note)
-        self.note.remove(note_to_delete)
+    def modify_note(self, note: str, new_note: str, contact: Contact, changing_note_session: ContactSession) -> None:
+        note_to_modify = self.get_note(note, contact)
+        note_to_modify.note = new_note
+        changing_note_session.commit()
+        changing_note_session.close()
+
+    def delete_note(self, note: str, contact: Contact, deleting_note_session: ContactSession) -> None:
+        note_to_delete = self.get_note(note, contact)
+        deleting_note_session.delete(note_to_delete)
+        deleting_note_session.commit()
+        deleting_note_session.close()
 
     def search_for_notes(self, search_symbols: str) -> List[Note]:
         found_notes = []
@@ -239,7 +251,6 @@ class Record:
         if len(contact.phones) > 0:
             for phone, contact_phone in zip(self.phone, contact.phones):
                 if phone.value == old_phone:
-                    phone.value = new_phone
                     contact.phones[contact.phones.index(contact_phone)].phone = new_phone
                     edit_session.commit()
                     edit_session.close()
@@ -258,7 +269,6 @@ class Record:
         if len(contact.addresses) > 0:
             for address, contact_address in zip(self.address, contact.addresses):
                 if address.value == old_address:
-                    address.value = new_address
                     contact.addresses[contact.addresses.index(contact_address)].address = new_address
                     edit_session.commit()
                     edit_session.close()
@@ -279,8 +289,8 @@ class Record:
         adding_info_session.commit()
         adding_info_session.close()
 
-    def add_address(self, new_address: str, contact: Contact, adding_info_session: ContactSession) -> None:
-        self.address.append(Address(new_address))
+    @staticmethod
+    def add_address(new_address: str, contact: Contact, adding_info_session: ContactSession) -> None:
         contact.addresses.append(ContactAddress(address=new_address))
         adding_info_session.commit()
         adding_info_session.close()

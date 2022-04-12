@@ -44,3 +44,7 @@ class UnknownFieldError(Exception):
 
 class UnknownAddressError(Exception):
     """Unknown address for selected contact"""
+
+
+class ExistTagError(Exception):
+    """Such tag already exist for this note"""

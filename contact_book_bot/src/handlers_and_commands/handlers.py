@@ -78,22 +78,21 @@ def add_note(
     return f"Successfully added '{note}' to {name} contact"
 
 
-# TODO : rewrite to db
 def delete_note(name: str, note: str, contacts_book: AddressBook) -> str:
-    contact = contacts_book.get_record_by_name(name)
-    contact.delete_note(note)
-    return f"You've successfully deleted '{note}' note for the {contact.name.value} contact"
+    contact, deleting_note_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    record.delete_note(note, contact, deleting_note_session)
+    return f"You've successfully deleted '{note}' note for the {name} contact"
 
 
-# TODO : rewrite to db
 def see_notes(name: str, contacts_book: AddressBook) -> str:
-    contact = contacts_book.get_record_by_name(name)
-    all_notes_by_contact = '\n'.join([str(c_note) for c_note in contact.note])
+    contact, seeing_notes_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    all_notes_by_contact = '\n'.join([str(c_note) for c_note in record.note])
     return f"All notes for {name} contact : \n\n" \
            f"{all_notes_by_contact}"
 
 
-# TODO : rewrite to db
 def change_note(
         name: str,
         old_note: str,
@@ -101,12 +100,12 @@ def change_note(
         new_note: list[str],
 ) -> str:
     note_to_add = new_note[0]
-    contact = contacts_book.get_record_by_name(name)
-    contact.modify_note(old_note, note_to_add)
-    return f"Successfully modified '{old_note}' to '{note_to_add}' for {contact.name.value} contact"
+    contact, changing_note_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    record.modify_note(old_note, note_to_add, contact, changing_note_session)
+    return f"Successfully modified '{old_note}' to '{note_to_add}' for {name} contact"
 
 
-# TODO : rewrite to db
 def add_tag(
         name: str,
         note: str,
@@ -114,25 +113,25 @@ def add_tag(
         tag: list[str],
 ) -> str:
     tag_to_add = tag[0]
-    contact = contacts_book.get_record_by_name(name)
-    contact_note = contact.get_note(note)
-    contact_note.add_tag(tag_to_add)
-    return f"Successfully added '{tag_to_add}' to '{note}' of the {contact.name.value} contact"
+    contact, adding_tag_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    record.add_tag_to_note(tag_to_add, note, contact, adding_tag_session)
+    return f"Successfully added '{tag_to_add}' to '{note}' of the {name} contact"
 
 
-# TODO : rewrite to db
 def find_notes_with_tag(
         name: str,
         tag: str,
         contacts_book: AddressBook,
         sort_type: Optional[str] = None,
 ) -> str:
-    contact = contacts_book.get_record_by_name(name)
+    contact, finding_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    finding_session.close()
     found_notes = []
-    for note in contact.note:
-        merged_tags = ' '.join([this_tag.value for this_tag in note.tag])
-        if tag in merged_tags:
-            found_notes.append(note.value)
+    for this_note in record.note:
+        if tag in [this_tag.value for this_tag in this_note.tag]:
+            found_notes.append(this_note.value)
     if sort_type:
         if sort_type[0] == 'newest':
             found_notes.reverse()
@@ -141,13 +140,14 @@ def find_notes_with_tag(
         elif sort_type[0] == 'length':
             found_notes.sort(key=len, reverse=False)
     return f"Here are the list of the notes for the " \
-           f"{contact.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
+           f"{record.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
 
 
-# TODO : rewrite to db
 def search_for_notes(name: str, search_symbols: str, contacts_book: AddressBook) -> str:
-    contact = contacts_book.get_record_by_name(name)
-    found_notes = contact.search_for_notes(search_symbols)
+    contact, searching_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    searching_session.close()
+    found_notes = record.search_for_notes(search_symbols)
     found_notes = '\n\n' + '\n'.join([str(find_note)
                                       for find_note in found_notes])
     return f"Here are the list of the notes for the " \
