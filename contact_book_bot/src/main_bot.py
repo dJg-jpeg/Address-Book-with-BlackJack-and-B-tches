@@ -102,7 +102,6 @@ def get_most_close_commands(command: str) -> list[str]:
 def main() -> None:
     bot_answer = None
     address_book = AddressBook()
-    address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
           'For example : \n add_contact \n name , phones, birthday\n\n'
@@ -130,8 +129,6 @@ def main() -> None:
             bot_answer = get_handler(address_book, handler, category, user_args)
         else:
             bot_answer = get_handler(address_book, handler, category)
-        if bot_answer == 'Good bye!':
-            address_book.save()
         print(bot_answer)
 
 

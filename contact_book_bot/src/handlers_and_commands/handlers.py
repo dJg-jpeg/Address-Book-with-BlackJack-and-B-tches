@@ -1,4 +1,4 @@
-from .bot_classes_and_exceptions.bot_classes import AddressBook, ContactOutput
+from .bot_classes_and_exceptions.bot_classes import AddressBook
 from .bot_classes_and_exceptions.bot_exceptions import ExistContactError, \
     LiteralsInDaysError, ZeroDaysError, UnknownFieldError, InvalidDirectoryPathError
 from .dir_sort_scrypt.dir_sorter import sort_dir
@@ -22,14 +22,13 @@ def greetings() -> str:
            f"See contacts birthdays in inputted amount of days: {COMMANDS[3]}\n" \
            f"Notes commands : {', '.join(COMMANDS[4])}\n" \
            f"To sort directory by given path : {COMMANDS[5]}\n" \
-           f"Stop bot's work : {', '.join(COMMANDS[1])}\n"
+           f"Stop bot work : {', '.join(COMMANDS[1])}\n"
 
 
 def add_contact(contact: dict, contacts_book: AddressBook) -> str:
     if contact['name'] in contacts_book.keys():
         raise ExistContactError
-    contacts_book.add_record(contact)
-    contact_for_output = ContactOutput(contacts_book[contact['name']])
+    contact_for_output = contacts_book.add_record(contact)
     return f"You successfully added:\n" \
            f"\t{contact_for_output.prepare_data_for_output()}"
 
@@ -73,17 +72,20 @@ def add_note(
         contacts_book: AddressBook,
         tag: list[str] or list,
 ) -> str:
-    contact = contacts_book.get_record_by_name(name)
-    contact.add_note(note, tag)
-    return f"Successfully added '{note}' to {contact.name.value} contact"
+    contact, adding_note_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
+    record.add_note(note, contact, adding_note_session, tag)
+    return f"Successfully added '{note}' to {name} contact"
 
 
+# TODO : rewrite to db
 def delete_note(name: str, note: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     contact.delete_note(note)
     return f"You've successfully deleted '{note}' note for the {contact.name.value} contact"
 
 
+# TODO : rewrite to db
 def see_notes(name: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     all_notes_by_contact = '\n'.join([str(c_note) for c_note in contact.note])
@@ -91,6 +93,7 @@ def see_notes(name: str, contacts_book: AddressBook) -> str:
            f"{all_notes_by_contact}"
 
 
+# TODO : rewrite to db
 def change_note(
         name: str,
         old_note: str,
@@ -103,6 +106,7 @@ def change_note(
     return f"Successfully modified '{old_note}' to '{note_to_add}' for {contact.name.value} contact"
 
 
+# TODO : rewrite to db
 def add_tag(
         name: str,
         note: str,
@@ -116,6 +120,7 @@ def add_tag(
     return f"Successfully added '{tag_to_add}' to '{note}' of the {contact.name.value} contact"
 
 
+# TODO : rewrite to db
 def find_notes_with_tag(
         name: str,
         tag: str,
@@ -139,6 +144,7 @@ def find_notes_with_tag(
            f"{contact.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
 
 
+# TODO : rewrite to db
 def search_for_notes(name: str, search_symbols: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
     found_notes = contact.search_for_notes(search_symbols)
@@ -166,15 +172,16 @@ def edit_contact(
         contacts_book: AddressBook,
         old_value: Optional[str] = None,
 ) -> str:
-    contact = contacts_book.get_record_by_name(name)
+    contact, edit_record_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
     if field == 'phone':
-        contact.modify_phone(old_value, new_value)
+        record.modify_phone(old_value, new_value, contact, edit_record_session)
     elif field == 'birthday':
-        contact.modify_birthday(new_value)
+        record.modify_birthday(new_value, contact, edit_record_session)
     elif field == 'address':
-        contact.modify_address(old_value, new_value)
+        record.modify_address(old_value, new_value, contact, edit_record_session)
     elif field == 'email':
-        contact.modify_email(new_value)
+        record.modify_email(new_value, contact, edit_record_session)
     else:
         raise UnknownFieldError
     return f"Successfully modified {field} from '{old_value}' to '{new_value}' of the {name} contact"
@@ -186,11 +193,12 @@ def add_info(
         contacts_book: AddressBook,
         new_value: list[str],
 ) -> str:
-    contact = contacts_book.get_record_by_name(name)
+    contact, adding_info_session = contacts_book.get_record_by_name(name)
+    record = contacts_book.convert_to_record(contact)
     if field == 'phone':
-        contact.add_phone(new_value[0])
+        record.add_phone(new_value[0], contact, adding_info_session)
     elif field == 'address':
-        contact.add_address(new_value[0])
+        record.add_address(new_value[0], contact, adding_info_session)
     else:
         raise UnknownFieldError
     return f"Successfully added '{new_value[0]}' to {field} field of the {name} contact"
