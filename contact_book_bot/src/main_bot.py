@@ -70,6 +70,9 @@ def get_handler(
                '(if add_info , accepted are phone or address, ' \
                'if edit_contact, accepted are phone, address, birthday and email)' \
                ', please try again'
+    except bot_exceptions.ExistTagError:
+        return 'Such tag already exists for this note, ' \
+               'please try another tag'
     except IndexError:
         return "Seems you haven't inputted obligatory arguments for the command, " \
                "or you have inputted too much arguments. Please try again"
@@ -102,7 +105,6 @@ def get_most_close_commands(command: str) -> list[str]:
 def main() -> None:
     bot_answer = None
     address_book = AddressBook()
-    address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
           'For example : \n add_contact \n name , phones, birthday\n\n'
@@ -130,8 +132,6 @@ def main() -> None:
             bot_answer = get_handler(address_book, handler, category, user_args)
         else:
             bot_answer = get_handler(address_book, handler, category)
-        if bot_answer == 'Good bye!':
-            address_book.save()
         print(bot_answer)
 
 

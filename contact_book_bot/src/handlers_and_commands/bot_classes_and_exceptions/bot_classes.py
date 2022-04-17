@@ -3,12 +3,15 @@ from datetime import datetime
 from typing import Optional, List
 from . import bot_exceptions
 from re import search
-from csv import DictReader, DictWriter
 from pathlib import Path
 from abc import abstractmethod, ABC
+from sqlalchemy.orm import sessionmaker
+from .contact_db_models import Contact, ContactPhone, ContactAddress, ContactNote, NoteTag, contact_db_engine
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
-CONTACTS_PATH = Path(__file__).parent.absolute().parent.parent / Path("contact_book.csv")
+CONTACTS_PATH = Path(__file__).parent.absolute().parent.parent / Path("contact_book.db")
+ContactSession = sessionmaker(bind=contact_db_engine)
+ContactSession.configure(bind=contact_db_engine)
 
 
 class UserOutput(ABC):
@@ -181,24 +184,49 @@ class Record:
         raw_record = ContactOutput(self)
         return raw_record.prepare_data_for_output()
 
-    def add_note(self, input_note: str, input_tag: Optional[List[str]] = None) -> None:
-        note_to_add = Note(input_note, input_tag)
-        self.note.append(note_to_add)
+    @staticmethod
+    def add_note(
+            input_note: str,
+            contact: Contact,
+            adding_note_session: ContactSession,
+            input_tag: Optional[List[str]] = None,
+    ) -> None:
+        note_to_insert = ContactNote(
+            note=input_note,
+            tags=[NoteTag(tag=tag) for tag in input_tag] if input_tag else None
+        )
+        contact.notes.append(note_to_insert)
+        adding_note_session.commit()
+        adding_note_session.close()
 
-    def get_note(self, note: str) -> Note:
-        for this_note in self.note:
-            if this_note.value == note:
+    @staticmethod
+    def get_note(note: str, contact) -> ContactNote:
+        for this_note in contact.notes:
+            if this_note.note == note:
                 return this_note
         else:
             raise bot_exceptions.UnknownNoteError
 
-    def modify_note(self, note: str, new_note: str) -> None:
-        note_to_modify = self.get_note(note)
-        note_to_modify.value = new_note
+    def add_tag_to_note(self, input_tag: str, note: str, contact: Contact, adding_tag_session: ContactSession) -> None:
+        required_note = self.get_note(note, contact)
+        if input_tag not in [contact_note_tag.tag for contact_note_tag in required_note.tags]:
+            required_note.tags.append(NoteTag(tag=input_tag))
+            adding_tag_session.commit()
+            adding_tag_session.close()
+        else:
+            raise bot_exceptions.ExistTagError
 
-    def delete_note(self, note: str) -> None:
-        note_to_delete = self.get_note(note)
-        self.note.remove(note_to_delete)
+    def modify_note(self, note: str, new_note: str, contact: Contact, changing_note_session: ContactSession) -> None:
+        note_to_modify = self.get_note(note, contact)
+        note_to_modify.note = new_note
+        changing_note_session.commit()
+        changing_note_session.close()
+
+    def delete_note(self, note: str, contact: Contact, deleting_note_session: ContactSession) -> None:
+        note_to_delete = self.get_note(note, contact)
+        deleting_note_session.delete(note_to_delete)
+        deleting_note_session.commit()
+        deleting_note_session.close()
 
     def search_for_notes(self, search_symbols: str) -> List[Note]:
         found_notes = []
@@ -207,165 +235,172 @@ class Record:
                 found_notes.append(note)
         return found_notes
 
-    def modify_email(self, new_email: str) -> None:
+    def modify_email(self, new_email: str, contact: Contact, edit_session: ContactSession) -> None:
         self.email = Email(new_email)
+        contact.email = new_email
+        edit_session.commit()
+        edit_session.close()
 
-    def modify_phone(self, old_phone: str, new_phone: str) -> None:
-        if self.phone:
-            for phone in self.phone:
+    def modify_phone(
+            self,
+            old_phone:
+            str, new_phone:
+            str, contact: Contact,
+            edit_session: ContactSession,
+    ) -> None:
+        if len(contact.phones) > 0:
+            for phone, contact_phone in zip(self.phone, contact.phones):
                 if phone.value == old_phone:
-                    phone.value = new_phone
+                    contact.phones[contact.phones.index(contact_phone)].phone = new_phone
+                    edit_session.commit()
+                    edit_session.close()
                     return None
             raise bot_exceptions.UnknownPhoneError
         else:
-            self.add_phone(new_phone)
+            self.add_phone(new_phone, contact, edit_session)
 
-    def modify_address(self, old_address: str, new_address: str) -> None:
-        if self.address:
-            for address in self.address:
+    def modify_address(
+            self,
+            old_address: str,
+            new_address: str,
+            contact: Contact,
+            edit_session: ContactSession,
+    ) -> None:
+        if len(contact.addresses) > 0:
+            for address, contact_address in zip(self.address, contact.addresses):
                 if address.value == old_address:
-                    address.value = new_address
+                    contact.addresses[contact.addresses.index(contact_address)].address = new_address
+                    edit_session.commit()
+                    edit_session.close()
                     return None
             raise bot_exceptions.UnknownAddressError
         else:
-            self.add_address(new_address)
+            self.add_address(new_address, contact, edit_session)
 
-    def modify_birthday(self, new_birthday: str) -> None:
+    def modify_birthday(self, new_birthday: str, contact: Contact, edit_session: ContactSession) -> None:
         self.birthday = Birthday(new_birthday)
+        contact.birthday = self.birthday.value
+        edit_session.commit()
+        edit_session.close()
 
-    def add_phone(self, new_phone: str) -> None:
+    def add_phone(self, new_phone: str, contact: Contact, adding_info_session: ContactSession) -> None:
         self.phone.append(Phone(new_phone))
+        contact.phones.append(ContactPhone(phone=new_phone))
+        adding_info_session.commit()
+        adding_info_session.close()
 
-    def add_address(self, new_address: str) -> None:
-        self.address.append(Address(new_address))
+    @staticmethod
+    def add_address(new_address: str, contact: Contact, adding_info_session: ContactSession) -> None:
+        contact.addresses.append(ContactAddress(address=new_address))
+        adding_info_session.commit()
+        adding_info_session.close()
 
 
 class AddressBook(UserDict):
     """All contacts data"""
 
-    def add_record(self, record: dict) -> None:
-        new_record = Record(
+    @staticmethod
+    def add_record(record: dict) -> ContactOutput:
+        new_contact_in_record = Record(
             name=record['name'],
             phones=record['numbers'],
             birthday=record['birthday'],
             addresses=record['address'],
             email=record['email'],
         )
-        self.data[new_record.name.value] = new_record
+        add_record_session = ContactSession()
+        new_contact = Contact(
+            name=record['name'],
+            birthday=new_contact_in_record.birthday.value if record['birthday'] else None,
+            email=record['email'],
+            phones=[ContactPhone(phone=phone_number) for phone_number in record['numbers']],
+            addresses=[ContactAddress(address=contact_address) for contact_address in record['address']],
+        )
+        add_record_session.add(new_contact)
+        add_record_session.commit()
+        add_record_session.close()
+        return ContactOutput(new_contact_in_record)
+
+    @staticmethod
+    def convert_to_record(contact_in_db: Contact) -> Record:
+        contact_phones = [rec_phone.phone for rec_phone in contact_in_db.phones]
+        contact_addresses = [rec_address.address for rec_address in contact_in_db.addresses]
+        converted_in_record = Record(
+            name=contact_in_db.name,
+            phones=contact_phones,
+            addresses=contact_addresses,
+            birthday=contact_in_db.birthday.strftime("%d.%m.%Y") if contact_in_db.birthday else None,
+            email=contact_in_db.email,
+        )
+        for this_note_for_contact in contact_in_db.notes:
+            converted_in_record.note.append(
+                Note(this_note_for_contact.note, [rec_note_tag.tag for rec_note_tag in this_note_for_contact.tags])
+            )
+        return converted_in_record
 
     def find_record(self, sought_string: str) -> dict:
+        finding_session = ContactSession()
         found_contacts = {
+            'by_name': finding_session.query(Contact).filter(
+                Contact.name.ilike(f"%{sought_string}%")
+            ).all(),
+            'by_phone': finding_session.query(Contact).join(
+                ContactPhone, Contact.id == ContactPhone.contact_id).filter(
+                ContactPhone.phone.ilike(f"%{sought_string}%")
+            ).all(),
+            'by_email': finding_session.query(Contact).filter(
+                Contact.email.ilike(f"%{sought_string}%")
+            ).all(),
+            'by_address': finding_session.query(Contact).join(
+                ContactAddress, Contact.id == ContactAddress.contact_id).filter(
+                ContactAddress.address.ilike(f"%{sought_string}%")
+            ).all(),
+        }
+        found_contacts_for_output = {
             'by_name': [],
             'by_phone': [],
             'by_email': [],
             'by_address': [],
         }
-        for name, record in self.data.items():
-            if sought_string in name:
-                found_contacts['by_name'].append(str(record))
-            elif sought_string in '|,|'.join([phone.value for phone in record.phone]):
-                found_contacts['by_phone'].append(str(record))
-            elif record.email and sought_string in record.email.value:
-                found_contacts['by_email'].append(str(record))
-            elif sought_string in '|,|'.join(addr.value for addr in record.address):
-                found_contacts['by_address'].append(str(record))
-        return found_contacts
-
-    def load(self) -> None:
-        with open(CONTACTS_PATH, 'r') as tr:
-            contacts_reader = DictReader(tr)
-            for row in contacts_reader:
-                contact_phones = None
-                if row['numbers'] != 'None':
-                    contact_phones = row['numbers'].split(',')
-                contact_birthday = None
-                if row['birthday'] != 'None':
-                    contact_birthday = row['birthday']
-                contact_addresses = None
-                if row['addresses'] != 'None':
-                    contact_addresses = row['addresses'].split(',')
-                contact_email = None
-                if row['email'] != 'None':
-                    contact_email = row['email']
-                if row['notes'] != 'None':
-                    raw_notes = (row['notes'].split(','))[:-1]
-                    self.data[row['name']] = Record(
-                                                row['name'],
-                                                contact_phones,
-                                                contact_birthday,
-                                                contact_addresses,
-                                                contact_email,
-                                             )
-                    contact = self.get_record_by_name(row['name'])
-                    for raw_note in raw_notes:
-                        prepared_note, raw_tags = raw_note.split('|tags:|')
-                        prepared_tags = raw_tags.split('/|')
-                        contact.add_note(prepared_note, prepared_tags)
-                else:
-                    self.data[row['name']] = Record(
-                                                row['name'],
-                                                contact_phones,
-                                                contact_birthday,
-                                                contact_addresses,
-                                                contact_email,
-                                             )
-
-    def save(self) -> None:
-        with open(CONTACTS_PATH, 'w') as tw:
-            contacts_writer = DictWriter(tw, FIELD_NAMES, )
-            contacts_writer.writeheader()
-            for name, record in self.data.items():
-                contact_phones = 'None'
-                if len(record.phone) > 0:
-                    contact_phones = ','.join([phone.value for phone in record.phone])
-                contact_birthday = 'None'
-                if record.birthday:
-                    contact_birthday = record.birthday.value.strftime("%d.%m.%Y")
-                contact_addresses = 'None'
-                if len(record.address) > 0:
-                    contact_addresses = ','.join([addr.value for addr in record.address])
-                notes = ''
-                if len(record.note) != 0:
-                    for this_note in record.note:
-                        this_note_tags = ""
-                        if len(this_note.tag) > 0:
-                            this_note_tags = "/|".join([tag.value for tag in this_note.tag])
-                        notes += f'{this_note.value}' \
-                                 f'|tags:|' \
-                                 f'{this_note_tags},'
-                else:
-                    notes = 'None'
-                contact_email = 'None'
-                if record.email:
-                    contact_email = record.email.value
-                contacts_writer.writerow({'name': name,
-                                          'numbers': contact_phones,
-                                          'birthday': contact_birthday,
-                                          'addresses': contact_addresses,
-                                          'email': contact_email,
-                                          'notes': notes,
-                                          })
+        for category, contacts in found_contacts.items():
+            for this_contact in contacts:
+                this_contact_in_record = self.convert_to_record(this_contact)
+                found_contacts_for_output[category].append(str(this_contact_in_record))
+        return found_contacts_for_output
 
     def see_all_contacts(self) -> str:
-        all_records = [str(record) for record in self.data.values()]
+        see_all_session = ContactSession()
+        all_records = []
+        for this_contact in see_all_session.query(Contact).all():
+            new_record = self.convert_to_record(this_contact)
+            all_records.append(str(new_record))
+        see_all_session.close()
         return '\n'.join(all_records)
 
-    def get_record_by_name(self, name: str) -> Record:
-        try:
-            return self.data[name]
-        except KeyError:
+    @staticmethod
+    def get_record_by_name(name: str) -> (Contact, ContactSession):
+        get_record_session = ContactSession()
+        founded_record = get_record_session.query(Contact).filter(Contact.name == name).first()
+        if founded_record:
+            return founded_record, get_record_session
+        else:
             raise bot_exceptions.UnknownContactError
 
     def delete_record(self, name: str) -> None:
-        self.get_record_by_name(name)
-        self.data.pop(name)
+        contact_to_delete, get_record_session = self.get_record_by_name(name)
+        get_record_session.close()
+        deleting_session = ContactSession()
+        deleting_session.delete(contact_to_delete)
+        deleting_session.commit()
+        deleting_session.close()
 
     def get_birthdays_by_days(self, days_from_now: int) -> str:
+        birthdays_session = ContactSession()
         birthdays_in_future = []
-        for name, record in self.data.items():
-            if record.birthday:
-                if record.days_to_birthday() == days_from_now:
-                    birthdays_in_future.append(name)
+        for contact in birthdays_session.query(Contact).filter(Contact.birthday is not None):
+            record = self.convert_to_record(contact)
+            if record.days_to_birthday() == days_from_now:
+                birthdays_in_future.append(record.name.value)
         return f'These people have birthdays in ' \
                f'{days_from_now} days from now: ' \
                f'{",".join(birthdays_in_future) if len(birthdays_in_future) != 0 else "None"}'
