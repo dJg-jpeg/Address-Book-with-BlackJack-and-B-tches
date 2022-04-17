@@ -1,7 +1,10 @@
 from pathlib import Path
 import re
 import shutil
+from collections import Counter
 from typing import Generator, List, Tuple, Any, Optional
+from redis import StrictRedis
+from redis_lru import RedisLRU
 
 FOLDERS_NAMES = ('image', 'video', 'audio', 'document', 'archive', 'unknown')
 FILE_TYPES_EXTENSIONS = (
@@ -11,6 +14,8 @@ FILE_TYPES_EXTENSIONS = (
     ('.doc', '.docx', '.txt', '.pdf', '.xlsx', '.pptx'),
     ('.zip', '.gz', '.tar')
 )
+sort_client = StrictRedis(host="localhost", port=6379, password=None)
+sort_cache = RedisLRU(sort_client)
 
 
 def check_file_extension(extension: str) -> str:
@@ -20,6 +25,7 @@ def check_file_extension(extension: str) -> str:
     return FOLDERS_NAMES[5]
 
 
+@sort_cache
 def find_all_files(path: Generator[Path, Any, Any], files: List[list]) -> Tuple[List[Path]]:
     for content in path:
         if content.is_file():
@@ -71,10 +77,19 @@ def get_filename_and_extension(filename: Path) -> Tuple[str, str]:
     return filename.resolve().stem, filename.suffix
 
 
-def rename_files(files: Tuple[List[Path]]) -> Tuple[List[Path]]:
+def normalize_filenames(files):
+    filenames = []
     for category in files:
+        filenames.append([])
         for content in category:
             filename = normalize(get_filename_and_extension(content)[0]) + get_filename_and_extension(content)[1]
+            if filename in filenames[-1]:
+                filenames[-1].append(filename)
+                filename = f'{get_filename_and_extension(content)[0]}' \
+                           f'({Counter(filenames[-1])[filename] - 1})' \
+                           f'{get_filename_and_extension(content)[1]}'
+            else:
+                filenames[-1].append(filename)
             content.rename(content.parent / filename)
             files[files.index(category)][category.index(content)] = content.parent / filename
     return files
@@ -108,7 +123,7 @@ def sort_dir(dir_name: str) -> Optional[str]:
     p = Path(dir_name)
     if p.is_dir():
         all_files = find_all_files(p.iterdir(), [[], [], [], [], [], []])
-        all_files = rename_files(all_files)
+        all_files = normalize_filenames(all_files)
         new_dirs = make_dirs(p)
         move_files(all_files, new_dirs)
         remove_empty_dirs(p.iterdir())
