@@ -102,7 +102,6 @@ def get_most_close_commands(command: str) -> list[str]:
 def main() -> None:
     bot_answer = None
     address_book = AddressBook()
-    address_book.load()
     print('Welcome! '
           'Please separate arguments using the , character.\n'
           'For example : \n add_contact \n name , phones, birthday\n\n'
@@ -116,7 +115,7 @@ def main() -> None:
         except KeyError:
             close_commands = get_most_close_commands(prepared_command)
             if len(close_commands) != 0:
-                print(f"Seems like you'd missprinted this command. "
+                print(f"Seems like you'd misprinted this command. "
                       f"The most close commands to your input are: \n {', '.join(close_commands)}")
             else:
                 print("I don't know such command, please try again(")
@@ -130,8 +129,6 @@ def main() -> None:
             bot_answer = get_handler(address_book, handler, category, user_args)
         else:
             bot_answer = get_handler(address_book, handler, category)
-        if bot_answer == 'Good bye!':
-            address_book.save()
         print(bot_answer)
 
 

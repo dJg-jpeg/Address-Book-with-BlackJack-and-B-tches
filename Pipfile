@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 frozendict = "==2.3.0"
-sqlalchemy = "==1.4.34"
-alembic = "==1.7.7"
+mongoengine = "==0.24.1"
+pymongo = {version = "==4.1.1", extras = ["srv"]}
 
 [dev-packages]
 flake8 = "==4.0.1"

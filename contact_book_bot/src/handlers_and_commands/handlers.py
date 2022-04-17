@@ -22,14 +22,13 @@ def greetings() -> str:
            f"See contacts birthdays in inputted amount of days: {COMMANDS[3]}\n" \
            f"Notes commands : {', '.join(COMMANDS[4])}\n" \
            f"To sort directory by given path : {COMMANDS[5]}\n" \
-           f"Stop bot's work : {', '.join(COMMANDS[1])}\n"
+           f"Stop bots work : {', '.join(COMMANDS[1])}\n"
 
 
 def add_contact(contact: dict, contacts_book: AddressBook) -> str:
     if contact['name'] in contacts_book.keys():
         raise ExistContactError
-    contacts_book.add_record(contact)
-    contact_for_output = ContactOutput(contacts_book[contact['name']])
+    contact_for_output = contacts_book.add_record(contact)
     return f"You successfully added:\n" \
            f"\t{contact_for_output.prepare_data_for_output()}"
 
@@ -74,19 +73,22 @@ def add_note(
         tag: list[str] or list,
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
-    contact.add_note(note, tag)
-    return f"Successfully added '{note}' to {contact.name.value} contact"
+    contact_in_record = contacts_book.convert_to_record(contact)
+    contact_in_record.add_note(note, contact, tag)
+    return f"Successfully added '{note}' to {name} contact"
 
 
 def delete_note(name: str, note: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    contact.delete_note(note)
-    return f"You've successfully deleted '{note}' note for the {contact.name.value} contact"
+    contact_in_record = contacts_book.convert_to_record(contact)
+    contact_in_record.delete_note(note, contact)
+    return f"You've successfully deleted '{note}' note for the {name} contact"
 
 
 def see_notes(name: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    all_notes_by_contact = '\n'.join([str(c_note) for c_note in contact.note])
+    contact_in_record = contacts_book.convert_to_record(contact)
+    all_notes_by_contact = '\n'.join([str(c_note) for c_note in contact_in_record.note])
     return f"All notes for {name} contact : \n\n" \
            f"{all_notes_by_contact}"
 
@@ -99,8 +101,9 @@ def change_note(
 ) -> str:
     note_to_add = new_note[0]
     contact = contacts_book.get_record_by_name(name)
-    contact.modify_note(old_note, note_to_add)
-    return f"Successfully modified '{old_note}' to '{note_to_add}' for {contact.name.value} contact"
+    contact_in_record = contacts_book.convert_to_record(contact)
+    contact_in_record.modify_note(old_note, note_to_add, contact)
+    return f"Successfully modified '{old_note}' to '{note_to_add}' for {name} contact"
 
 
 def add_tag(
@@ -111,9 +114,9 @@ def add_tag(
 ) -> str:
     tag_to_add = tag[0]
     contact = contacts_book.get_record_by_name(name)
-    contact_note = contact.get_note(note)
-    contact_note.add_tag(tag_to_add)
-    return f"Successfully added '{tag_to_add}' to '{note}' of the {contact.name.value} contact"
+    contact_in_record = contacts_book.convert_to_record(contact)
+    contact_in_record.add_tag_to_note(tag_to_add, note, contact)
+    return f"Successfully added '{tag_to_add}' to '{note}' of the {name} contact"
 
 
 def find_notes_with_tag(
@@ -123,8 +126,9 @@ def find_notes_with_tag(
         sort_type: Optional[str] = None,
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
+    contact_in_record = contacts_book.convert_to_record(contact)
     found_notes = []
-    for note in contact.note:
+    for note in contact_in_record.note:
         merged_tags = ' '.join([this_tag.value for this_tag in note.tag])
         if tag in merged_tags:
             found_notes.append(note.value)
@@ -136,12 +140,13 @@ def find_notes_with_tag(
         elif sort_type[0] == 'length':
             found_notes.sort(key=len, reverse=False)
     return f"Here are the list of the notes for the " \
-           f"{contact.name.value} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
+           f"{name} contact with '{tag}' tag: \n {' / '.join(found_notes)}"
 
 
 def search_for_notes(name: str, search_symbols: str, contacts_book: AddressBook) -> str:
     contact = contacts_book.get_record_by_name(name)
-    found_notes = contact.search_for_notes(search_symbols)
+    contact_in_record = contacts_book.convert_to_record(contact)
+    found_notes = contact_in_record.search_for_notes(search_symbols)
     found_notes = '\n\n' + '\n'.join([str(find_note)
                                       for find_note in found_notes])
     return f"Here are the list of the notes for the " \
@@ -167,14 +172,15 @@ def edit_contact(
         old_value: Optional[str] = None,
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
+    contact_in_record = contacts_book.convert_to_record(contact)
     if field == 'phone':
-        contact.modify_phone(old_value, new_value)
+        contact_in_record.modify_phone(old_value, new_value, contact)
     elif field == 'birthday':
-        contact.modify_birthday(new_value)
+        contact_in_record.modify_birthday(new_value, contact)
     elif field == 'address':
-        contact.modify_address(old_value, new_value)
+        contact_in_record.modify_address(old_value, new_value, contact)
     elif field == 'email':
-        contact.modify_email(new_value)
+        contact_in_record.modify_email(new_value, contact)
     else:
         raise UnknownFieldError
     return f"Successfully modified {field} from '{old_value}' to '{new_value}' of the {name} contact"
@@ -187,10 +193,11 @@ def add_info(
         new_value: list[str],
 ) -> str:
     contact = contacts_book.get_record_by_name(name)
+    contact_in_record = contacts_book.convert_to_record(contact)
     if field == 'phone':
-        contact.add_phone(new_value[0])
+        contact_in_record.add_phone(new_value[0], contact)
     elif field == 'address':
-        contact.add_address(new_value[0])
+        contact_in_record.add_address(new_value[0], contact)
     else:
         raise UnknownFieldError
     return f"Successfully added '{new_value[0]}' to {field} field of the {name} contact"

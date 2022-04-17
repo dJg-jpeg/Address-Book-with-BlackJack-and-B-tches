@@ -1,22 +1,22 @@
 # About
 
-This Address Book package works as a terminal/command line chatbot to help you save your contacts in one place on your computer and sort files. 
+This ContactAddress Book package works as a terminal/command line chatbot to help you save your contacts in one place on your computer and sort files. 
 
 ## This chatbot has following list of commands:
 
 * hello, help – see the list of commands and a short instruction on how to use commands
 
-* add_contact - adds a new contact to the Address Book with name, phone, email, birthday, notes and tags
+* add_contact - adds a new contact to the ContactAddress Book with name, phone, email, birthday, notes and tags
 
-* find_contact - searches for the contact in the Address Book based on your search input
+* find_contact - searches for the contact in the ContactAddress Book based on your search input
 
-* delete_contact – finds and deletes the record from the Address Book based on your search input
+* delete_contact – finds and deletes the record from the ContactAddress Book based on your search input
 
 * birthdays_from_now – provides the list of people who have birthdays in a week, month, year, or any other given number of days.
 
 * sort_dir – sorts the files in your directory by the extensions (videos, music, docs, etc.)
 
-* show_all – shows all the records and record fields stored in your Address Book
+* show_all – shows all the records and record fields stored in your ContactAddress Book
 
 * goodbye, exit, close – exits the program
 
@@ -42,9 +42,9 @@ The bot will try to guess what command you were trying to use in case you misspe
 
 # Package contents
 
-* bot_classes.py – contains description of all the Address Book bot classes and their methods
+* bot_classes.py – contains description of all the ContactAddress Book bot classes and their methods
 * dir_sorter.py – a separate module to sort files in the directory to different folders by extensions
-* handlers.py – contains functions and methods that call for bot_classes.py Classes and methods, additional methods to manipulate Address Book contents.
+* handlers.py – contains functions and methods that call for bot_classes.py Classes and methods, additional methods to manipulate ContactAddress Book contents.
 * main_bot.py – main script
 
 # System Requirements
