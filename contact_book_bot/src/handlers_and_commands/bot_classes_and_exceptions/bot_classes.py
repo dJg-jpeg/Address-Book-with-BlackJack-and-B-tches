@@ -6,10 +6,11 @@ from re import search
 from pathlib import Path
 from abc import abstractmethod, ABC
 from sqlalchemy.orm import sessionmaker
-from .contact_db_models import Contact, ContactPhone, ContactAddress, ContactNote, NoteTag, contact_db_engine
+from contact_book_bot.src.handlers_and_commands.db_management.contact_db_models import Contact, \
+    ContactPhone, ContactAddress, ContactNote, NoteTag, contact_db_engine
 
 FIELD_NAMES = ('name', 'numbers', 'birthday', 'addresses', 'email', 'notes')
-CONTACTS_PATH = Path(__file__).parent.absolute().parent.parent / Path("contact_book.db")
+CONTACTS_PATH = Path(__file__).parent.absolute().parent / Path("db_management/contact_book.db")
 ContactSession = sessionmaker(bind=contact_db_engine)
 ContactSession.configure(bind=contact_db_engine)
 
@@ -200,7 +201,7 @@ class Record:
         adding_note_session.close()
 
     @staticmethod
-    def get_note(note: str, contact) -> ContactNote:
+    def get_note(note: str, contact: Contact) -> ContactNote:
         for this_note in contact.notes:
             if this_note.note == note:
                 return this_note
@@ -209,12 +210,8 @@ class Record:
 
     def add_tag_to_note(self, input_tag: str, note: str, contact: Contact, adding_tag_session: ContactSession) -> None:
         required_note = self.get_note(note, contact)
-        if input_tag not in [contact_note_tag.tag for contact_note_tag in required_note.tags]:
-            required_note.tags.append(NoteTag(tag=input_tag))
-            adding_tag_session.commit()
-            adding_tag_session.close()
-        else:
-            raise bot_exceptions.ExistTagError
+        required_note.tags.append(NoteTag(tag=input_tag))
+        adding_tag_session.commit()
 
     def modify_note(self, note: str, new_note: str, contact: Contact, changing_note_session: ContactSession) -> None:
         note_to_modify = self.get_note(note, contact)
@@ -299,27 +296,31 @@ class Record:
 class AddressBook(UserDict):
     """All contacts data"""
 
-    @staticmethod
-    def add_record(record: dict) -> ContactOutput:
-        new_contact_in_record = Record(
-            name=record['name'],
-            phones=record['numbers'],
-            birthday=record['birthday'],
-            addresses=record['address'],
-            email=record['email'],
-        )
+    def add_record(self, record: dict) -> ContactOutput:
         add_record_session = ContactSession()
-        new_contact = Contact(
-            name=record['name'],
-            birthday=new_contact_in_record.birthday.value if record['birthday'] else None,
-            email=record['email'],
-            phones=[ContactPhone(phone=phone_number) for phone_number in record['numbers']],
-            addresses=[ContactAddress(address=contact_address) for contact_address in record['address']],
-        )
-        add_record_session.add(new_contact)
-        add_record_session.commit()
-        add_record_session.close()
-        return ContactOutput(new_contact_in_record)
+        try:
+            self.get_record_by_name(record['name'])
+            add_record_session.close()
+            raise bot_exceptions.ExistContactError
+        except bot_exceptions.UnknownContactError:
+            new_contact_in_record = Record(
+                name=record['name'],
+                phones=record['numbers'],
+                birthday=record['birthday'],
+                addresses=record['address'],
+                email=record['email'],
+            )
+            new_contact = Contact(
+                name=record['name'],
+                birthday=new_contact_in_record.birthday.value if record['birthday'] else None,
+                email=record['email'],
+                phones=[ContactPhone(phone=phone_number) for phone_number in record['numbers']],
+                addresses=[ContactAddress(address=contact_address) for contact_address in record['address']],
+            )
+            add_record_session.add(new_contact)
+            add_record_session.commit()
+            add_record_session.close()
+            return ContactOutput(new_contact_in_record)
 
     @staticmethod
     def convert_to_record(contact_in_db: Contact) -> Record:
@@ -362,20 +363,24 @@ class AddressBook(UserDict):
             'by_email': [],
             'by_address': [],
         }
+        contact_names = []
         for category, contacts in found_contacts.items():
             for this_contact in contacts:
                 this_contact_in_record = self.convert_to_record(this_contact)
-                found_contacts_for_output[category].append(str(this_contact_in_record))
+                if this_contact_in_record.name.value in contact_names:
+                    continue
+                contact_names.append(this_contact_in_record.name.value)
+                found_contacts_for_output[category].append(this_contact_in_record)
         return found_contacts_for_output
 
-    def see_all_contacts(self) -> str:
+    def see_all_contacts(self) -> list[Record]:
         see_all_session = ContactSession()
         all_records = []
         for this_contact in see_all_session.query(Contact).all():
             new_record = self.convert_to_record(this_contact)
-            all_records.append(str(new_record))
+            all_records.append(new_record)
         see_all_session.close()
-        return '\n'.join(all_records)
+        return all_records
 
     @staticmethod
     def get_record_by_name(name: str) -> (Contact, ContactSession):

@@ -1,6 +1,6 @@
 from .bot_classes_and_exceptions.bot_classes import AddressBook
-from .bot_classes_and_exceptions.bot_exceptions import ExistContactError, \
-    LiteralsInDaysError, ZeroDaysError, UnknownFieldError, InvalidDirectoryPathError
+from .bot_classes_and_exceptions.bot_exceptions import LiteralsInDaysError, ZeroDaysError, \
+    UnknownFieldError, InvalidDirectoryPathError
 from .dir_sort_scrypt.dir_sorter import sort_dir
 from typing import Optional
 
@@ -26,8 +26,6 @@ def greetings() -> str:
 
 
 def add_contact(contact: dict, contacts_book: AddressBook) -> str:
-    if contact['name'] in contacts_book.keys():
-        raise ExistContactError
     contact_for_output = contacts_book.add_record(contact)
     return f"You successfully added:\n" \
            f"\t{contact_for_output.prepare_data_for_output()}"
@@ -54,7 +52,8 @@ def dir_sort(path_to_dir: str) -> str:
 
 
 def show_all(contacts_book: AddressBook) -> str:
-    return contacts_book.see_all_contacts()
+    all_records = contacts_book.see_all_contacts()
+    return "\n\n".join([str(record) for record in all_records])
 
 
 def delete_contact(name: str, contacts_book: AddressBook) -> str:
@@ -88,9 +87,8 @@ def delete_note(name: str, note: str, contacts_book: AddressBook) -> str:
 def see_notes(name: str, contacts_book: AddressBook) -> str:
     contact, seeing_notes_session = contacts_book.get_record_by_name(name)
     record = contacts_book.convert_to_record(contact)
-    all_notes_by_contact = '\n'.join([str(c_note) for c_note in record.note])
-    return f"All notes for {name} contact : \n\n" \
-           f"{all_notes_by_contact}"
+    seeing_notes_session.close()
+    return record.note
 
 
 def change_note(
@@ -110,13 +108,14 @@ def add_tag(
         name: str,
         note: str,
         contacts_book: AddressBook,
-        tag: list[str],
+        tags_to_add: list[str],
 ) -> str:
-    tag_to_add = tag[0]
     contact, adding_tag_session = contacts_book.get_record_by_name(name)
     record = contacts_book.convert_to_record(contact)
-    record.add_tag_to_note(tag_to_add, note, contact, adding_tag_session)
-    return f"Successfully added '{tag_to_add}' to '{note}' of the {name} contact"
+    for this_tag in tags_to_add:
+        record.add_tag_to_note(this_tag, note, contact, adding_tag_session)
+    adding_tag_session.close()
+    return f"Successfully added '{tags_to_add}' to '{note}' of the {name} contact"
 
 
 def find_notes_with_tag(

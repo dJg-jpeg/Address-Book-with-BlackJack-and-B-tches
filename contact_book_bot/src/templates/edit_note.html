@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Редагувати нотатку</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px"
+      >
+        <ul>
+          <li><a href="/see_notes/{{contact_name}}" role="button">Повернутись до нотаток</a></li>
+        </ul>
+      </nav>
+      <form method="post" action="{{note_value}}">
+        <div style="padding: 10px">
+          <label
+            >Введіть нове значення нотатки:
+            <input type="text" name="new_note" placeholder="{{note_value}}"/>
+          </label>
+        </div>
+        <div class="grid">
+          <button type="reset" class="secondary">Скинути</button>
+          <button type="submit">Замінити</button>
+        </div>
+      </form>
+      <div class="grid">
+          {% for tag in note_tags %}
+          <article>
+            <p>{{tag}}</p>
+            <a href="{{note_value}}/delete_tag/{{tag}}" role="button">Видалити тег</a>
+          </article>
+          {% endfor %}
+      </div>
+    </main>
+  </body>
+</html>

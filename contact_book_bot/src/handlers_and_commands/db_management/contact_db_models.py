@@ -5,7 +5,7 @@ from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Date
 
 
-contact_db_engine = create_engine('sqlite:///contact_book.db')
+contact_db_engine = create_engine('sqlite:///src/handlers_and_commands/db_management/contact_book.db')
 Base = declarative_base()
 
 

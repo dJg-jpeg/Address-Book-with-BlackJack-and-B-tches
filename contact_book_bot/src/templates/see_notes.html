@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Інформація про нотатки</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px"
+      >
+        <ul>
+          <li><a href="/" role="button"> Повернутись на головну </a></li>
+        </ul>
+      </nav>
+      {% for note in notes %}
+      <article>
+        <p>{{note.value}}</p>
+        <p>Tags: <small>{{ note.tag|join(', ')}}</small></p>
+        <a href="add_tag/{{note.value}}" role="button"> Додати теги</a>
+        <a href="edit_note/{{note.value}}" role="button"> Редагувати нотатку</a>
+        <a href="delete_note/{{note.value}}" role="button"> Видалити нотатку</a>
+      </article>
+      {% endfor %}
+    </main>
+  </body>
+</html>

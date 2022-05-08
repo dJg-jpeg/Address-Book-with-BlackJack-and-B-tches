@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from contact_book_bot.src.handlers_and_commands.bot_classes_and_exceptions.contact_db_models import Base
+from contact_book_bot.src.handlers_and_commands.db_management.contact_db_models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

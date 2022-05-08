@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Додати нотатку</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px"
+      >
+        <ul>
+          <li><a href="/" role="button">Повернутись на головну</a></li>
+        </ul>
+      </nav>
+      <form method="post" action="{{contact_name}}">
+        <div style="padding: 10px">
+          <label
+            >Нотатка:
+            <input type="text" name="note" required />
+          </label>
+        </div>
+        <div style="padding: 10px">
+          <label
+            >Теги(записуйте, розділяючи комами):
+            <input type="text" name="tags"/>
+          </label>
+        </div>
+        <div class="grid">
+          <button type="reset" class="secondary">Скинути</button>
+          <button type="submit">Створити</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Додати новий контакт</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px"
+      >
+        <ul>
+          <li><a href="/" role="button"> Повернутись на головну</a></li>
+        </ul>
+      </nav>
+      <form method="POST" action="/add_contact">
+        <div style="padding: 10px">
+          <label
+            >Ім'я контакту:
+            <input type="text" name="name" required />
+          </label>
+        </div>
+        <div style="padding: 10px">
+          <label
+            >Номери телефонів(записуйте, розділяючи комами):
+            <input type="text" name="phone_numbers"/>
+          </label>
+        </div>
+        <div style="padding: 10px">
+          <label
+            >Дата народження:
+            <input type="date" name="birthday"/>
+          </label>
+        </div>
+        <div style="padding: 10px">
+          <label
+            >Адреси(записуйте, розділяючи комами):
+            <input type="text" name="addresses" />
+          </label>
+        </div>
+        <div style="padding: 10px">
+          <label
+            >Електронна пошта:
+            <input type="text" name="email" />
+          </label>
+        </div>
+        <div class="grid">
+          <button type="reset" class="secondary">Скинути</button>
+          <button type="submit">Створити</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

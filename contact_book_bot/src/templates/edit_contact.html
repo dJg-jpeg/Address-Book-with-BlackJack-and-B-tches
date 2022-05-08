@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Редагувати контакт</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px"
+      >
+        <ul>
+          <li><a href="/" role="button">Повернутись на головну</a></li>
+        </ul>
+      </nav>
+      <div class="grid">
+        <form id="birthday" method="post" action="{{contact_name}}">
+          <div style="padding: 10px">
+            <label
+              >Введіть новий день народження:
+              <input type="date" name="birthday" placeholder="{{birthday_value}}"/>
+            </label>
+          </div>
+          <div class="grid">
+            <button type="reset" class="secondary">Скинути</button>
+            <button type="submit">Замінити</button>
+          </div>
+        </form>
+        <form id="email" method="post" action="{{contact_name}}">
+          <div style="padding: 10px" class="grid">
+            <label
+              >Введіть новий email:
+              <input type="text" name="email" placeholder="{{email_value}}"/>
+            </label>
+          </div>
+          <div class="grid">
+            <button type="reset" class="secondary">Скинути</button>
+            <button type="submit">Замінити</button>
+          </div>
+        </form>
+      </div>
+      <div style="padding: 10px">
+          <div class="grid">
+            {% for phone in phone_numbers %}
+            <div style="padding: 10px display: inline">
+              <p>{{phone}}</p>
+              <a href="{{contact_name}}/delete_number/{{phone}}" role="button">Видалити номер</a>
+            </div>
+            {% endfor %}
+          </div>
+          <article>
+            <form id="new_phone" method="post" action="{{contact_name}}">
+            <div style="padding: 10px" class="grid">
+              <label
+                >Введіть новий номер:
+                <input type="text" name="new_number"/>
+              </label>
+            </div>
+            <div class="grid">
+              <button type="reset" class="secondary">Скинути</button>
+              <button type="submit">Додати новий номер</button>
+            </div>
+          </form>
+          </article>
+      </div>
+      <div style="padding: 10px">
+        <div class="grid">
+          {% for address in addresses %}
+          <div style="padding: 10px">
+            <p>{{address}}</p>
+            <a href="{{contact_name}}/delete_address/{{address}}" role="button">Видалити адресу</a>
+          </div>
+          {% endfor %}
+        </div>
+        <article>
+          <form id="new_address" method="post" action="{{contact_name}}">
+            <div style="padding: 10px" class="grid">
+              <label
+                >Введіть нову адресу:
+                <input type="text" name="new_address"/>
+              </label>
+            </div>
+            <div class="grid">
+              <button type="reset" class="secondary">Скинути</button>
+              <button type="submit">Додати нову адресу</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

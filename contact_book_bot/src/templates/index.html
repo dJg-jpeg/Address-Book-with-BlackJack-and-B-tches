@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Контактна книга</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav
+        style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 250px"
+      >
+        <ul>
+          <li><a href="/add_contact" role="button">Додати контакт</a></li>
+          <li>
+            <form method="POST" action="/">
+              <input type="search" name="find_request">Пошук контактів
+            </form>
+          </li>
+        </ul>
+      </nav>
+
+      {% for contact in contacts %}
+      <article>
+        <div class="grid">
+          <div>{{contact.name.value}}</div>
+          <div>
+              {% for phone in contact.phone %}
+            <ul>
+              <li>
+                {{phone.value}}
+              </li>
+            </ul>
+            {% endfor %}
+          </div>
+          <div>{{contact.birthday.value}}</div>
+          <div>
+            {% for address in contact.address %}
+            <ul>
+              <li>
+                {{address.value}}
+              </li>
+            </ul>
+            {% endfor %}
+          </div>
+          <div>{{contact.email.value}}</div>
+        </div>
+        <a href="/see_notes/{{contact.name.value}}/" role="button">Подивитись нотатки</a>
+        <a href="/add_note/{{contact.name.value}}" role="button">Додати нотатку</a>
+        <a href="/edit_contact/{{contact.name.value}}" role="button">Редагувати контакт</a>
+        <a href="/delete_contact/{{contact.name.value}}" role="button">Видалити контакт</a>
+      </article>
+      {% endfor %}
+    </main>
+  </body>
+</html>
